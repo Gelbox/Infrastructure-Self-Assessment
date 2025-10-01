@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ProAV Infrastructure Self-Assessment</title>
+  <meta name="description" content="Neutral, task-focused self-assessment and worksheet for AV-over-IP readiness." />
+  <style>
+    :root{
+      --bg:#ffffff; --ink:#111111; --muted:#444; --line:#ddd; --accent:#0a66c2;
+      --ok:#1b8f3a; --warn:#b8860b; --danger:#b00020;
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Noto Sans",sans-serif}
+    .wrap{max-width:940px;margin:0 auto;padding:24px}
+    h1{margin:0 0 6px;font-size:clamp(24px,3vw,34px);line-height:1.15}
+    h2{margin:16px 0 8px;font-size:clamp(18px,2.2vw,24px)}
+    h3{margin:14px 0 6px;font-size:16px}
+    p{margin:8px 0}
+    .muted{color:var(--muted)}
+    .panel{border:1px solid var(--line);border-radius:var(--radius);padding:16px;background:#fafafa}
+    .grid{display:grid;gap:16px}
+    .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .keyline{height:1px;background:var(--line);margin:12px 0}
+    .list-clean{list-style:none;margin:0;padding:0}
+    .list-clean li{padding:8px 0;border-bottom:1px solid var(--line)}
+    .list-clean li:last-child{border-bottom:0}
+    .meter{height:10px;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
+    .bar{height:100%;width:0%}
+    .score{font-size:20px;font-weight:700}
+    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 8px;background:#fff}
+    input[type="number"],input[type="text"],input[type="search"],input[type="url"]{
+      width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)
+    }
+    .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+    .scale input{display:none}
+    .scale label{display:block;text-align:center;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;user-select:none}
+    .scale input:checked + label{outline:2px solid var(--accent)}
+    button{
+      appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font-weight:600;cursor:pointer
+    }
+    button:focus{outline:2px solid var(--accent)}
+    .legend{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+    .swatch{width:16px;height:10px;border-radius:3px;border:1px solid var(--line)}
+    .ok{background:var(--ok)} .warn{background:var(--warn)} .danger{background:var(--danger)}
+    footer{margin-top:24px;color:var(--muted);font-size:12px}
+    @media (max-width:900px){.cols-2,.cols-3{grid-template-columns:1fr}}
+    @media print{
+      button{display:none}
+      .panel{background:#fff}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="document">
+    <header class="panel">
+      <h1>ProAV Infrastructure Self-Assessment</h1>
+      <p class="muted">Purpose: provide a short, repeatable check for AV-over-IP deployment readiness. Scope: foundations only (observability, monitoring, interoperability, user adoption, room acoustics). Output: numeric score and worksheet to inform planning.</p>
+    </header>
+
+    <section class="grid cols-2" aria-labelledby="risk-check">
+      <div class="panel" id="risk-check">
+        <h2>Five-Factor Check</h2>
+        <p class="muted">Rate each factor from 1 (absent) to 5 (robust). Use current, verifiable state—not intent.</p>
+        <form id="scoreForm">
+          <div class="grid cols-2">
+            <div>
+              <label class="pill" for="obs">Observability</label>
+              <div class="scale">
+                <input type="radio" name="obs" id="obs1" value="1"><label for="obs1">1</label>
+                <input type="radio" name="obs" id="obs2" value="2"><label for="obs2">2</label>
+                <input type="radio" name="obs" id="obs3" value="3"><label for="obs3">3</label>
+                <input type="radio" name="obs" id="obs4" value="4"><label for="obs4">4</label>
+                <input type="radio" name="obs" id="obs5" value="5"><label for="obs5">5</label>
+              </div>
+            </div>
+            <div>
+              <label class="pill" for="mon">Monitoring</label>
+              <div class="scale">
+                <input type="radio" name="mon" id="mon1" value="1"><label for="mon1">1</label>
+                <input type="radio" name="mon" id="mon2" value="2"><label for="mon2">2</label>
+                <input type="radio" name="mon" id="mon3" value="3"><label for="mon3">3</label>
+                <input type="radio" name="mon" id="mon4" value="4"><label for="mon4">4</label>
+                <input type="radio" name="mon" id="mon5" value="5"><label for="mon5">5</label>
+              </div>
+            </div>
+            <div>
+              <label class="pill" for="intop">Interoperability</label>
+              <div class="scale">
+                <input type="radio" name="intop" id="intop1" value="1"><label for="intop1">1</label>
+                <input type="radio" name="intop" id="intop2" value="2"><label for="intop2">2</label>
+                <input type="radio" name="intop" id="intop3" value="3"><label for="intop3">3</label>
+                <input type="radio" name="intop" id="intop4" value="4"><label for="intop4">4</label>
+                <input type="radio" name="intop" id="intop5" value="5"><label for="intop5">5</label>
+              </div>
+            </div>
+            <div>
+              <label class="pill" for="user">User adoption</label>
+              <div class="scale">
+                <input type="radio" name="user" id="user1" value="1"><label for="user1">1</label>
+                <input type="radio" name="user" id="user2" value="2"><label for="user2">2</label>
+                <input type="radio" name="user" id="user3" value="3"><label for="user3">3</label>
+                <input type="radio" name="user" id="user4" value="4"><label for="user4">4</label>
+                <input type="radio" name="user" id="user5" value="5"><label for="user5">5</label>
+              </div>
+            </div>
+            <div>
+              <label class="pill" for="acoust">Room acoustics</label>
+              <div class="scale">
+                <input type="radio" name="acoust" id="acoust1" value="1"><label for="acoust1">1</label>
+                <input type="radio" name="acoust" id="acoust2" value="2"><label for="acoust2">2</label>
+                <input type="radio" name="acoust" id="acoust3" value="3"><label for="acoust3">3</label>
+                <input type="radio" name="acoust" id="acoust4" value="4"><label for="acoust4">4</label>
+                <input type="radio" name="acoust" id="acoust5" value="5"><label for="acoust5">5</label>
+              </div>
+            </div>
+          </div>
+          <div class="keyline"></div>
+          <div class="grid">
+            <div>
+              <div class="muted">Score</div>
+              <div class="score" id="scoreText">0</div>
+              <div class="meter" aria-hidden="true"><div id="bar" class="bar"></div></div>
+              <div id="riskText" class="muted" aria-live="polite"></div>
+              <div class="legend" aria-hidden="true">
+                <span class="swatch danger"></span><span>0-7 high risk</span>
+                <span class="swatch warn"></span><span>8-12 needs work</span>
+                <span class="swatch ok"></span><span>13-25 sound</span>
+              </div>
+            </div>
+            <div>
+              <button type="button" id="copyBtn" aria-label="Copy score">Copy score</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel" id="method">
+        <h2>Methodology (3-5-7)</h2>
+        <p class="muted">Use as a checklist; treat each item as verifiable evidence, not narrative.</p>
+        <ul class="list-clean">
+          <li><strong>Core goals (3):</strong> reliability, security, user experience</li>
+          <li><strong>Initiatives (5):</strong> network design, redundancy, training, vendor verification, telemetry</li>
+          <li><strong>Milestones (7):</strong> design review, lab validation, pilot, documentation, training, failover test, post-launch audit</li>
+        </ul>
+        <div class="keyline"></div>
+        <h3>Definitions</h3>
+        <ul class="list-clean">
+          <li><strong>Observability:</strong> ability to infer system state from logs/metrics/traces</li>
+          <li><strong>Monitoring:</strong> alerting on SLO breaches with clear runbooks</li>
+          <li><strong>Interoperability:</strong> multi-vendor compatibility confirmed in a lab</li>
+          <li><strong>User adoption:</strong> tasks completed by target users without assistance</li>
+          <li><strong>Room acoustics:</strong> RT60, background noise, and STI within design targets</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="worksheet">
+      <h2 id="worksheet">Worksheet</h2>
+      <p class="muted">Capture intent and evidence. One line per item. Keep sources and owners explicit.</p>
+      <form id="ws">
+        <h3>Core goals (3)</h3>
+        <div class="grid cols-3">
+          <input aria-label="Goal 1" placeholder="Goal 1 — owner / due / evidence" />
+          <input aria-label="Goal 2" placeholder="Goal 2 — owner / due / evidence" />
+          <input aria-label="Goal 3" placeholder="Goal 3 — owner / due / evidence" />
+        </div>
+        <div class="keyline"></div>
+        <h3>Initiatives (5)</h3>
+        <div class="grid cols-3">
+          <input aria-label="Initiative 1" placeholder="Initiative 1 — artifact / status" />
+          <input aria-label="Initiative 2" placeholder="Initiative 2 — artifact / status" />
+          <input aria-label="Initiative 3" placeholder="Initiative 3 — artifact / status" />
+          <input aria-label="Initiative 4" placeholder="Initiative 4 — artifact / status" />
+          <input aria-label="Initiative 5" placeholder="Initiative 5 — artifact / status" />
+        </div>
+        <div class="keyline"></div>
+        <h3>Milestones (7)</h3>
+        <div class="grid cols-3">
+          <input aria-label="Milestone 1" placeholder="Design review — sign-off link" />
+          <input aria-label="Milestone 2" placeholder="Lab validation — test plan id" />
+          <input aria-label="Milestone 3" placeholder="Pilot — scope / exit criteria" />
+          <input aria-label="Milestone 4" placeholder="Documentation — location" />
+          <input aria-label="Milestone 5" placeholder="Training — curriculum / attendance" />
+          <input aria-label="Milestone 6" placeholder="Failover test — pass/fail" />
+          <input aria-label="Milestone 7" placeholder="Post-launch audit — findings" />
+        </div>
+        <div class="keyline"></div>
+        <button type="button" id="exportBtn">Export worksheet (.txt)</button>
+      </form>
+    </section>
+
+    <footer>
+      <div>Attribution: internal use. No marketing content. No data collected.</div>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById('scoreForm');
+    const scoreText = document.getElementById('scoreText');
+    const riskText = document.getElementById('riskText');
+    const bar = document.getElementById('bar');
+    const copyBtn = document.getElementById('copyBtn');
+
+    function calc(){
+      const fd = new FormData(form);
+      let s = 0;
+      ['obs','mon','intop','user','acoust'].forEach(k => { s += +(fd.get(k)||0) });
+      scoreText.textContent = s;
+      const pct = Math.min(100, Math.round(s/25*100));
+      bar.style.width = pct + '%';
+      bar.style.background = s < 8 ? 'var(--danger)' : (s <= 12 ? 'var(--warn)' : 'var(--ok)');
+      riskText.textContent = s < 8 ? 'High risk (0–7)' : (s <= 12 ? 'Needs work (8–12)' : 'Sound (13–25)');
+    }
+    form.addEventListener('change', calc); calc();
+
+    copyBtn.addEventListener('click', async () => {
+      const txt = `Self-Assessment Score: ${scoreText.textContent}`;
+      try { await navigator.clipboard.writeText(txt); copyBtn.textContent = 'Copied'; setTimeout(()=>copyBtn.textContent='Copy score',1200); }
+      catch(e){ alert(txt); }
+    });
+
+    const ws = document.getElementById('ws');
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const inputs = [...ws.querySelectorAll('input')];
+      const lines = ['ProAV Infrastructure Worksheet',''];
+      const heads = ['Core goals','Initiatives','Milestones'];
+      const counts = [3,5,7];
+      let idx = 0;
+      heads.forEach((h,i)=>{
+        lines.push(h+':');
+        for(let j=0;j<counts[i];j++){ lines.push('- ' + (inputs[idx++].value||'')); }
+        lines.push('');
+      });
+      const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'proav-worksheet.txt';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
