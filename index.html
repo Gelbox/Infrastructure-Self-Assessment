@@ -7,7 +7,7 @@
   <meta name="description" content="Neutral, task-focused self-assessment and worksheet for AV-over-IP readiness." />
   <style>
     :root{
-      --bg:#ffffff; --ink:#111111; --muted:#444; --line:#ddd; --accent:#0a66c2;
+      --bg:#091217; --ink:#091217 --muted:#444; --line:#ddd; --accent:#0a66c2;
       --ok:#1b8f3a; --warn:#b8860b; --danger:#b00020;
       --radius:12px;
     }
@@ -192,6 +192,89 @@
       </form>
     </section>
 
+    <!-- QUALIFYING GATE -->
+<section class="panel" id="access">
+  <h2>Access worksheet export</h2>
+  <p class="muted">Provide work details to receive the export. Purpose: tailor follow-up; you can opt out anytime.</p>
+
+  <form id="qualForm" novalidate>
+    <div class="grid cols-2">
+      <div>
+        <label>Email (work) *</label>
+        <input type="email" name="email" required placeholder="name@company.com" />
+      </div>
+      <div>
+        <label>Role *</label>
+        <select name="role" required>
+          <option value="">Select</option>
+          <option value="decision">Decision-maker</option>
+          <option value="influencer">Technical influencer</option>
+          <option value="user">End user</option>
+        </select>
+      </div>
+      <div>
+        <label>Company size *</label>
+        <select name="size" required>
+          <option value="">Select</option>
+          <option value="200-1999">200–1,999</option>
+          <option value="2000+">2,000+</option>
+          <option value="<200"><200</option>
+        </select>
+      </div>
+      <div>
+        <label>Project timeline *</label>
+        <select name="timeline" required>
+          <option value="">Select</option>
+          <option value="0-3">0–3 months</option>
+          <option value="3-6">3–6 months</option>
+          <option value="6+">>6 months</option>
+        </select>
+      </div>
+      <div>
+        <label>Budget status *</label>
+        <select name="budget" required>
+          <option value="">Select</option>
+          <option value="approved">Approved</option>
+          <option value="planned">Planned</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+      <div>
+        <label>AV-over-IP stack (vendors)</label>
+        <input type="text" name="stack" placeholder="e.g., Q-SYS, Dante, NDI, Crestron" />
+      </div>
+      <div class="cols-2" style="grid-column:1/-1">
+        <label>Primary challenge *</label>
+        <select name="challenge" required>
+          <option value="">Select</option>
+          <option value="downtime">Downtime risk</option>
+          <option value="interop">Interoperability</option>
+          <option value="observability">Observability/monitoring</option>
+          <option value="acoustics">Room performance</option>
+          <option value="adoption">User adoption</option>
+        </select>
+      </div>
+    </div>
+
+    <input type="hidden" name="utm_source" id="utm_source">
+    <input type="hidden" name="utm_medium" id="utm_medium">
+    <input type="hidden" name="utm_campaign" id="utm_campaign">
+    <input type="hidden" name="page_url" id="page_url">
+    <input type="hidden" name="timestamp" id="timestamp">
+
+    <div class="keyline"></div>
+    <label style="display:flex;gap:8px;align-items:flex-start">
+      <input type="checkbox" name="consent" required>
+      <span>I agree to receive the worksheet and related materials. Privacy policy linked here.</span>
+    </label>
+
+    <div class="keyline"></div>
+    <button type="submit" id="unlockBtn" disabled>Unlock export</button>
+    <div id="mqlBadge" class="muted" style="margin-top:8px"></div>
+  </form>
+</section>
+
+
     <footer>
       <div>©Flicktronix – Attribution: internal use. No marketing content. No data collected.</div>
     </footer>
@@ -203,6 +286,81 @@
     const riskText = document.getElementById('riskText');
     const bar = document.getElementById('bar');
     const copyBtn = document.getElementById('copyBtn');
+
+    // ——— Qualification & gating ———
+const f = document.getElementById('qualForm');
+const unlockBtn = document.getElementById('unlockBtn');
+const badge = document.getElementById('mqlBadge');
+
+['email','role','size','timeline','budget','challenge','consent'].forEach(n=>{
+  f.elements[n].addEventListener('input', validate);
+  f.elements[n].addEventListener('change', validate);
+});
+
+function validate(){
+  const requiredOk = ['email','role','size','timeline','budget','challenge','consent']
+    .every(n => n==='consent' ? f.elements[n].checked : !!f.elements[n].value);
+  // basic work email gate
+  const em = f.elements.email.value.trim();
+  const isWork = em && !/@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|aol\.com)$/i.test(em);
+  unlockBtn.disabled = !(requiredOk && isWork);
+}
+
+function scoreLead(){
+  let s = 0;
+  const role = f.elements.role.value;
+  const size = f.elements.size.value;
+  const t = f.elements.timeline.value;
+  const b = f.elements.budget.value;
+  const stack = (f.elements.stack.value||'').toLowerCase();
+  const ch = f.elements.challenge.value;
+
+  // scoring
+  s += role==='decision' ? 8 : role==='influencer' ? 5 : 2;
+  s += size==='200-1999' ? 10 : size==='2000+' ? 8 : 2;
+  s += t==='0-3' ? 8 : t==='3-6' ? 5 : 2;
+  s += b==='approved' ? 8 : b==='planned' ? 5 : 1;
+
+  if (/(q-sys|qsc|dante|ndi|crestron|extron|sdp|avb)/.test(stack)) s += 6;
+
+  s += ch==='downtime' ? 6 : (ch ? 3 : 0);
+
+  const bucket = s >= 28 ? 'MQL' : s >= 18 ? 'Nurture' : 'Disqualify';
+  return {score:s, bucket};
+}
+
+// populate tracking fields
+document.getElementById('page_url').value = location.href;
+const p = new URLSearchParams(location.search);
+['utm_source','utm_medium','utm_campaign'].forEach(k=>{
+  document.getElementById(k).value = p.get(k) || '';
+});
+document.getElementById('timestamp').value = new Date().toISOString();
+
+// enable export after submit; emit analytics
+f.addEventListener('submit', e => {
+  e.preventDefault();
+  const {score, bucket} = scoreLead();
+  localStorage.setItem('lead_score', score);
+  localStorage.setItem('lead_bucket', bucket);
+  badge.textContent = `Lead score ${score} — ${bucket}`;
+  // TODO: send to backend/CRM
+  // fetch('/api/lead', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(f)))});
+
+  // unlock worksheet export
+  const exportBtn = document.getElementById('exportBtn');
+  exportBtn.removeAttribute('disabled');
+  exportBtn.textContent = 'Export worksheet (.txt)';
+});
+
+// lock export by default
+const exportBtn = document.getElementById('exportBtn');
+if (exportBtn){
+  exportBtn.setAttribute('disabled','disabled');
+  exportBtn.textContent = 'Complete form to export';
+}
+
+validate();
 
     function calc(){
       const fd = new FormData(form);
@@ -239,6 +397,8 @@
       const a = document.createElement('a'); a.href = url; a.download = 'proav-worksheet.txt';
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     });
+
+    
   </script>
 </body>
 </html>
