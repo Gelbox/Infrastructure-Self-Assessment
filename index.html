@@ -281,124 +281,162 @@
   </div>
 
   <script>
-    const form = document.getElementById('scoreForm');
-    const scoreText = document.getElementById('scoreText');
-    const riskText = document.getElementById('riskText');
-    const bar = document.getElementById('bar');
-    const copyBtn = document.getElementById('copyBtn');
+"use strict";
 
-    // ——— Qualification & gating ———
-const f = document.getElementById('qualForm');
-const unlockBtn = document.getElementById('unlockBtn');
-const badge = document.getElementById('mqlBadge');
+// ——— Helpers ———
+const $ = (sel, root = document) => root.querySelector(sel);
 
-['email','role','size','timeline','budget','challenge','consent'].forEach(n=>{
-  f.elements[n].addEventListener('input', validate);
-  f.elements[n].addEventListener('change', validate);
-});
+// ——— Scoring UI (risk check) ———
+document.addEventListener("DOMContentLoaded", () => {
+  const form = $("#scoreForm");
+  const scoreText = $("#scoreText");
+  const riskText = $("#riskText");
+  const bar = $("#bar");
+  const copyBtn = $("#copyBtn");
 
-function validate(){
-  const requiredOk = ['email','role','size','timeline','budget','challenge','consent']
-    .every(n => n==='consent' ? f.elements[n].checked : !!f.elements[n].value);
-  // basic work email gate
-  const em = f.elements.email.value.trim();
-  const isWork = em && !/@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|aol\.com)$/i.test(em);
-  unlockBtn.disabled = !(requiredOk && isWork);
-}
-
-function scoreLead(){
-  let s = 0;
-  const role = f.elements.role.value;
-  const size = f.elements.size.value;
-  const t = f.elements.timeline.value;
-  const b = f.elements.budget.value;
-  const stack = (f.elements.stack.value||'').toLowerCase();
-  const ch = f.elements.challenge.value;
-
-  // scoring
-  s += role==='decision' ? 8 : role==='influencer' ? 5 : 2;
-  s += size==='200-1999' ? 10 : size==='2000+' ? 8 : 2;
-  s += t==='0-3' ? 8 : t==='3-6' ? 5 : 2;
-  s += b==='approved' ? 8 : b==='planned' ? 5 : 1;
-
-  if (/(q-sys|qsc|dante|ndi|crestron|extron|sdp|avb)/.test(stack)) s += 6;
-
-  s += ch==='downtime' ? 6 : (ch ? 3 : 0);
-
-  const bucket = s >= 28 ? 'MQL' : s >= 18 ? 'Nurture' : 'Disqualify';
-  return {score:s, bucket};
-}
-
-// populate tracking fields
-document.getElementById('page_url').value = location.href;
-const p = new URLSearchParams(location.search);
-['utm_source','utm_medium','utm_campaign'].forEach(k=>{
-  document.getElementById(k).value = p.get(k) || '';
-});
-document.getElementById('timestamp').value = new Date().toISOString();
-
-// enable export after submit; emit analytics
-f.addEventListener('submit', e => {
-  e.preventDefault();
-  const {score, bucket} = scoreLead();
-  localStorage.setItem('lead_score', score);
-  localStorage.setItem('lead_bucket', bucket);
-  badge.textContent = `Lead score ${score} — ${bucket}`;
-  // TODO: send to backend/CRM
-  // fetch('/api/lead', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(f)))});
-
-  // unlock worksheet export
-  const exportBtn = document.getElementById('exportBtn');
-  exportBtn.removeAttribute('disabled');
-  exportBtn.textContent = 'Export worksheet (.txt)';
-});
-
-// lock export by default
-const exportBtn = document.getElementById('exportBtn');
-if (exportBtn){
-  exportBtn.setAttribute('disabled','disabled');
-  exportBtn.textContent = 'Complete form to export';
-}
-
-validate();
-
-    function calc(){
-      const fd = new FormData(form);
-      let s = 0;
-      ['obs','mon','intop','user','acoust'].forEach(k => { s += +(fd.get(k)||0) });
-      scoreText.textContent = s;
+  function calc(){
+    if(!form) return;
+    const fd = new FormData(form);
+    let s = 0;
+    ["obs","mon","intop","user","acoust"].forEach(k => { s += +(fd.get(k)||0) });
+    if(scoreText) scoreText.textContent = s;
+    if(bar){
       const pct = Math.min(100, Math.round(s/25*100));
-      bar.style.width = pct + '%';
-      bar.style.background = s < 8 ? 'var(--danger)' : (s <= 12 ? 'var(--warn)' : 'var(--ok)');
-      riskText.textContent = s < 8 ? 'High risk (0–7)' : (s <= 12 ? 'Needs work (8–12)' : 'Sound (13–25)');
+      bar.style.width = pct + "%";
+      bar.style.background = s < 8 ? "var(--danger)" : (s <= 12 ? "var(--warn)" : "var(--ok)");
     }
-    form.addEventListener('change', calc); calc();
-
-    copyBtn.addEventListener('click', async () => {
-      const txt = `Self-Assessment Score: ${scoreText.textContent}`;
-      try { await navigator.clipboard.writeText(txt); copyBtn.textContent = 'Copied'; setTimeout(()=>copyBtn.textContent='Copy score',1200); }
+    if(riskText) riskText.textContent = s < 8 ? "High risk (0–7)" : (s <= 12 ? "Needs work (8–12)" : "Sound (13–25)");
+  }
+  if(form){
+    form.addEventListener("change", calc);
+    calc();
+  }
+  if(copyBtn){
+    copyBtn.addEventListener("click", async () => {
+      const txt = `Self-Assessment Score: ${scoreText ? scoreText.textContent : "0"}`;
+      try { await navigator.clipboard.writeText(txt); copyBtn.textContent = "Copied"; setTimeout(()=>copyBtn.textContent="Copy score",1200); }
       catch(e){ alert(txt); }
     });
+  }
+});
 
-    const ws = document.getElementById('ws');
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      const inputs = [...ws.querySelectorAll('input')];
-      const lines = ['ProAV Infrastructure Worksheet',''];
-      const heads = ['Core goals','Initiatives','Milestones'];
-      const counts = [3,5,7];
-      let idx = 0;
-      heads.forEach((h,i)=>{
-        lines.push(h+':');
-        for(let j=0;j<counts[i];j++){ lines.push('- ' + (inputs[idx++].value||'')); }
-        lines.push('');
-      });
-      const blob = new Blob([lines.join('\n')], {type:'text/plain'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'proav-worksheet.txt';
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    });
+// ——— Worksheet export ———
+function exportWorksheet(){
+  const ws = $("#ws") || $("#worksheet");
+  const inputs = ws ? Array.from(ws.querySelectorAll("input")) : [];
+  if (!inputs.length) return;
+  const lines = ["ProAV Infrastructure Worksheet",""];
+  const heads = ["Core goals","Initiatives","Milestones"];
+  const counts = [3,5,7];
+  let i = 0;
+  heads.forEach((h,idx)=>{
+    lines.push(h + ":");
+    for(let j=0;j<counts[idx];j++) lines.push("- " + (inputs[i++]?.value || ""));
+    lines.push("");
+  });
+  const blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
+  const bucket = (localStorage.getItem("lead_bucket") || "ungated").toLowerCase();
+  const fname = `proav-worksheet-${bucket}.txt`;
 
-    
-  </script>
+  // Legacy Edge fallback
+  if (window.navigator && "msSaveOrOpenBlob" in window.navigator) {
+    // @ts-ignore
+    window.navigator.msSaveOrOpenBlob(blob, fname);
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const exportBtn = $("#exportBtn");
+  if (exportBtn) exportBtn.addEventListener("click", exportWorksheet);
+});
+
+// ——— Qualifying gate (optional; keeps export locked until form submit) ———
+document.addEventListener("DOMContentLoaded", () => {
+  const f = $("#qualForm");
+  const unlockBtn = $("#unlockBtn");
+  const badge = $("#mqlBadge");
+  const exportBtn = $("#exportBtn");
+
+  // Lock export by default if gate present
+  if (f && exportBtn){
+    exportBtn.setAttribute("disabled","disabled");
+    exportBtn.textContent = "Complete form to export";
+  }
+
+  if (!f) return;
+
+  ["email","role","size","timeline","budget","challenge","consent"].forEach(n=>{
+    const el = f.elements[n];
+    if(!el) return;
+    el.addEventListener("input", validate);
+    el.addEventListener("change", validate);
+  });
+
+  function validate(){
+    const need = ["email","role","size","timeline","budget","challenge","consent"];
+    const requiredOk = need.every(n => n==="consent" ? f.elements[n]?.checked : !!f.elements[n]?.value);
+    const em = (f.elements.email?.value || "").trim();
+    const isWork = em && !/@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|aol\.com|icloud\.com)$/i.test(em);
+    if(unlockBtn) unlockBtn.disabled = !(requiredOk && isWork);
+  }
+
+  function scoreLead(){
+    let s = 0;
+    const role = f.elements.role?.value;
+    const size = f.elements.size?.value;
+    const t = f.elements.timeline?.value;
+    const b = f.elements.budget?.value;
+    const stack = (f.elements.stack?.value || "").toLowerCase();
+    const ch = f.elements.challenge?.value;
+
+    s += role==="decision" ? 8 : role==="influencer" ? 5 : 2;
+    s += size==="200-1999" ? 10 : size==="2000+" ? 8 : 2;
+    s += t==="0-3" ? 8 : t==="3-6" ? 5 : 2;
+    s += b==="approved" ? 8 : b==="planned" ? 5 : 1;
+    if (/(q-sys|qsc|dante|ndi|crestron|extron|sdp|avb)/.test(stack)) s += 6;
+    s += ch==="downtime" ? 6 : (ch ? 3 : 0);
+
+    const bucket = s >= 28 ? "MQL" : s >= 18 ? "Nurture" : "Disqualify";
+    return {score:s, bucket};
+  }
+
+  // Tracking fields
+  const p = new URLSearchParams(location.search);
+  const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+  setVal("page_url", location.href);
+  setVal("utm_source", p.get("utm_source") || p.get("utm") || "");
+  setVal("utm_medium", p.get("utm_medium") || "");
+  setVal("utm_campaign", p.get("utm_campaign") || "");
+  setVal("timestamp", new Date().toISOString());
+
+  f.addEventListener("submit", e => {
+    e.preventDefault();
+    const {score, bucket} = scoreLead();
+    localStorage.setItem("lead_score", String(score));
+    localStorage.setItem("lead_bucket", bucket);
+    if (badge) badge.textContent = `Lead score ${score} — ${bucket}`;
+
+    // TODO: send to backend/CRM if available
+    // fetch("/api/lead", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(new FormData(f)))}).catch(()=>{});
+
+    // Unlock export
+    if (exportBtn){
+      exportBtn.removeAttribute("disabled");
+      exportBtn.textContent = "Export worksheet (.txt)";
+    }
+  });
+
+  validate();
+});
+</script>
+
 </body>
 </html>
