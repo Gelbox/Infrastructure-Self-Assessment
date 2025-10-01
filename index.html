@@ -1,442 +1,428 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ProAV Infrastructure Self-Assessment</title>
-  <meta name="description" content="Neutral, task-focused self-assessment and worksheet for AV-over-IP readiness." />
-  <style>
-    :root{
-      --bg:#091217; --ink:#091217 --muted:#444; --line:#ddd; --accent:#0a66c2;
-      --ok:#1b8f3a; --warn:#b8860b; --danger:#b00020;
-      --radius:12px;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Noto Sans",sans-serif}
-    .wrap{max-width:940px;margin:0 auto;padding:24px}
-    h1{margin:0 0 6px;font-size:clamp(24px,3vw,34px);line-height:1.15}
-    h2{margin:16px 0 8px;font-size:clamp(18px,2.2vw,24px)}
-    h3{margin:14px 0 6px;font-size:16px}
-    p{margin:8px 0}
-    .muted{color:var(--muted)}
-    .panel{border:1px solid var(--line);border-radius:var(--radius);padding:16px;background:#fafafa}
-    .grid{display:grid;gap:16px}
-    .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .keyline{height:1px;background:var(--line);margin:12px 0}
-    .list-clean{list-style:none;margin:0;padding:0}
-    .list-clean li{padding:8px 0;border-bottom:1px solid var(--line)}
-    .list-clean li:last-child{border-bottom:0}
-    .meter{height:10px;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
-    .bar{height:100%;width:0%}
-    .score{font-size:20px;font-weight:700}
-    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 8px;background:#fff}
-    input[type="number"],input[type="text"],input[type="search"],input[type="url"]{
-      width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)
-    }
-    .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-    .scale input{display:none}
-    .scale label{display:block;text-align:center;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;user-select:none}
-    .scale input:checked + label{outline:2px solid var(--accent)}
-    button{
-      appearance:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px 12px;font-weight:600;cursor:pointer
-    }
-    button:focus{outline:2px solid var(--accent)}
-    .legend{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
-    .swatch{width:16px;height:10px;border-radius:3px;border:1px solid var(--line)}
-    .ok{background:var(--ok)} .warn{background:var(--warn)} .danger{background:var(--danger)}
-    footer{margin-top:24px;color:var(--muted);font-size:12px}
-    @media (max-width:900px){.cols-2,.cols-3{grid-template-columns:1fr}}
-    @media print{
-      button{display:none}
-      .panel{background:#fff}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AV Solution 3-Pillar Readiness Scorecard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#0b1f35;
+    --muted:#5b6b7e;
+    --panel:#f3f6f9;
+    --line:#e3e8ef;
+    --accent:#0b5fff;
+    --accent-ink:#ffffff;
+    --good:#1a7f37;
+    --warn:#ffb100;
+    --risk:#c62828;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}
+  a{color:var(--accent);text-decoration:none}
+  a:focus{outline:2px solid var(--accent)}
+  .wrap{max-width:1100px;margin-inline:auto;padding:32px 20px}
+  header{display:grid;gap:8px;margin-bottom:20px}
+  h1{font-size:34px;line-height:1.2;margin:0 0 2px}
+  .sub{color:var(--muted)}
+  .grid{display:grid;grid-template-columns:1.2fr .8fr; gap:20px}
+  @media (max-width: 980px){ .grid{grid-template-columns:1fr; } }
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .card h2{font-size:20px;margin:0 0 12px}
+  .muted{color:var(--muted)}
+  .kpi{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:6px 0 0}
+  .kpi .pill{background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:12px;min-width:120px;text-align:center}
+  .score-lg{font-size:44px;font-weight:700}
+  .bucket{font-weight:700;padding:6px 10px;border-radius:10px;display:inline-block}
+  .bucket.good{background:var(--good);color:#fff}
+  .bucket.warn{background:var(--warn);color:#111}
+  .bucket.risk{background:var(--risk);color:#fff}
+  fieldset{border:1px solid var(--line);padding:14px;border-radius:12px;background:#fff;margin:0 0 14px}
+  legend{padding:0 6px;font-weight:bold;font-size:1.1em;}
+  .qrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .qrow:last-child{border-bottom:0}
+  .opts{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+  .opts label{display:inline-flex;align-items:center;gap:6px;background:var(--panel);padding:6px 8px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+  input[type="radio"]{accent-color:var(--accent)}
+  .hint{font-size:13px;color:var(--muted)}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  button{appearance:none;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);padding:12px 14px;font-weight:600;cursor:pointer}
+  button[disabled]{opacity:.55;cursor:not-allowed}
+  .link-btn{background:#fff;color:var(--accent);border:1px solid var(--line)}
+  .foot{margin-top:18px;font-size:13px;color:var(--muted)}
+  .hr{height:1px;background:var(--line);margin:20px 0}
+  .notice{background:#fff8e1;border:1px solid #ffe5a7;border-radius:12px;padding:10px 12px}
+  .chart-container{position:relative;height:250px;width:100%}
+  .ml-embedded{isolation:isolate}
+</style>
 </head>
+
 <body>
-  <div class="wrap" role="document">
-    <header class="panel">
-      <h1>ProAV Infrastructure Self-Assessment</h1>
-      <p class="muted">Purpose: provide a short, repeatable check for AV-over-IP deployment readiness. Scope: foundations only (observability, monitoring, interoperability, user adoption, room acoustics). Output: numeric score and worksheet to inform planning.</p>
-    </header>
+<div class="wrap" id="top">
+  <header>
+    <h1>AV Solution 3-Pillar Readiness Scorecard</h1>
+    <p class="sub">Assess your AV-over-IP strategy against the 3 Pillars of a zero-downtime deployment: Design, Security, and Operations.</p>
+  </header>
 
-    <section class="grid cols-2" aria-labelledby="risk-check">
-      <div class="panel" id="risk-check">
-        <h2>Five-Factor Check</h2>
-        <p class="muted">Rate each factor from 1 (absent) to 5 (robust). Use current, verifiable state—not intent.</p>
-        <form id="scoreForm">
-          <div class="grid cols-2">
-            <div>
-              <label class="pill" for="obs">Observability</label>
-              <div class="scale">
-                <input type="radio" name="obs" id="obs1" value="1"><label for="obs1">1</label>
-                <input type="radio" name="obs" id="obs2" value="2"><label for="obs2">2</label>
-                <input type="radio" name="obs" id="obs3" value="3"><label for="obs3">3</label>
-                <input type="radio" name="obs" id="obs4" value="4"><label for="obs4">4</label>
-                <input type="radio" name="obs" id="obs5" value="5"><label for="obs5">5</label>
-              </div>
-            </div>
-            <div>
-              <label class="pill" for="mon">Monitoring</label>
-              <div class="scale">
-                <input type="radio" name="mon" id="mon1" value="1"><label for="mon1">1</label>
-                <input type="radio" name="mon" id="mon2" value="2"><label for="mon2">2</label>
-                <input type="radio" name="mon" id="mon3" value="3"><label for="mon3">3</label>
-                <input type="radio" name="mon" id="mon4" value="4"><label for="mon4">4</label>
-                <input type="radio" name="mon" id="mon5" value="5"><label for="mon5">5</label>
-              </div>
-            </div>
-            <div>
-              <label class="pill" for="intop">Interoperability</label>
-              <div class="scale">
-                <input type="radio" name="intop" id="intop1" value="1"><label for="intop1">1</label>
-                <input type="radio" name="intop" id="intop2" value="2"><label for="intop2">2</label>
-                <input type="radio" name="intop" id="intop3" value="3"><label for="intop3">3</label>
-                <input type="radio" name="intop" id="intop4" value="4"><label for="intop4">4</label>
-                <input type="radio" name="intop" id="intop5" value="5"><label for="intop5">5</label>
-              </div>
-            </div>
-            <div>
-              <label class="pill" for="user">User adoption</label>
-              <div class="scale">
-                <input type="radio" name="user" id="user1" value="1"><label for="user1">1</label>
-                <input type="radio" name="user" id="user2" value="2"><label for="user2">2</label>
-                <input type="radio" name="user" id="user3" value="3"><label for="user3">3</label>
-                <input type="radio" name="user" id="user4" value="4"><label for="user4">4</label>
-                <input type="radio" name="user" id="user5" value="5"><label for="user5">5</label>
-              </div>
-            </div>
-            <div>
-              <label class="pill" for="acoust">Room acoustics</label>
-              <div class="scale">
-                <input type="radio" name="acoust" id="acoust1" value="1"><label for="acoust1">1</label>
-                <input type="radio" name="acoust" id="acoust2" value="2"><label for="acoust2">2</label>
-                <input type="radio" name="acoust" id="acoust3" value="3"><label for="acoust3">3</label>
-                <input type="radio" name="acoust" id="acoust4" value="4"><label for="acoust4">4</label>
-                <input type="radio" name="acoust" id="acoust5" value="5"><label for="acoust5">5</label>
-              </div>
+  <div class="grid">
+    <main aria-labelledby="questions-title">
+      <div class="card">
+        <h2 id="questions-title">Readiness Assessment</h2>
+        <p class="muted">Select the option that best reflects your current state. Your pillar scores will update live.</p>
+
+        <fieldset>
+          <legend>Pillar 1: Design &amp; Interop</legend>
+          <div class="qrow">
+            <div><strong>PTP Domain Design</strong><div class="hint">Dedicated domains, BMCA strategy, GM resilience</div></div>
+            <div class="opts" role="radiogroup" aria-label="PTP domain design">
+              <label><input type="radio" name="q1" value="0" data-pillar="Design">None</label>
+              <label><input type="radio" name="q1" value="1" data-pillar="Design">Partial</label>
+              <label><input type="radio" name="q1" value="2" data-pillar="Design">Documented</label>
             </div>
           </div>
-          <div class="keyline"></div>
-          <div class="grid">
-            <div>
-              <div class="muted">Score</div>
-              <div class="score" id="scoreText">0</div>
-              <div class="meter" aria-hidden="true"><div id="bar" class="bar"></div></div>
-              <div id="riskText" class="muted" aria-live="polite"></div>
-              <div class="legend" aria-hidden="true">
-                <span class="swatch danger"></span><span>0-7 high risk</span>
-                <span class="swatch warn"></span><span>8-12 needs work</span>
-                <span class="swatch ok"></span><span>13-25 sound</span>
-              </div>
-            </div>
-            <div>
-              <button type="button" id="copyBtn" aria-label="Copy score">Copy score</button>
+          <div class="qrow">
+            <div><strong>Grandmaster Redundancy</strong><div class="hint">Dual GM, holdover, failover tests</div></div>
+            <div class="opts" role="radiogroup" aria-label="Grandmaster redundancy">
+              <label><input type="radio" name="q2" value="0" data-pillar="Design">Single GM</label>
+              <label><input type="radio" name="q2" value="1" data-pillar="Design">Warm spare</label>
+              <label><input type="radio" name="q2" value="2" data-pillar="Design">Active failover</label>
             </div>
           </div>
-        </form>
-      </div>
+          <div class="qrow">
+            <div><strong>Multicast Safety</strong><div class="hint">IGMPv3, PIM/SDM, RP/BSR, guardrails</div></div>
+            <div class="opts" role="radiogroup" aria-label="Multicast safety">
+              <label><input type="radio" name="q3" value="0" data-pillar="Design">Unmanaged</label>
+              <label><input type="radio" name="q3" value="1" data-pillar="Design">Basic IGMP</label>
+              <label><input type="radio" name="q3" value="2" data-pillar="Design">Engineered</label>
+            </div>
+          </div>
+          <div class="qrow">
+            <div><strong>QoS &amp; Queues</strong><div class="hint">LLQ/priority, policing, WRED disabled where needed</div></div>
+            <div class="opts" role="radiogroup" aria-label="QoS">
+              <label><input type="radio" name="q4" value="0" data-pillar="Design">Best-effort</label>
+              <label><input type="radio" name="q4" value="1" data-pillar="Design">Partial</label>
+              <label><input type="radio" name="q4" value="2" data-pillar="Design">End-to-end</label>
+            </div>
+          </div>
+          <div class="qrow">
+            <div><strong>Open Standards Adoption</strong><div class="hint">NMOS, AES67/ST 2110 interop validated</div></div>
+            <div class="opts" role="radiogroup" aria-label="Standards">
+              <label><input type="radio" name="q7" value="0" data-pillar="Design">None</label>
+              <label><input type="radio" name="q7" value="1" data-pillar="Design">Partial</label>
+              <label><input type="radio" name="q7" value="2" data-pillar="Design">Adopted</label>
+            </div>
+          </div>
+        </fieldset>
 
-      <div class="panel" id="method">
-        <h2>Methodology (3-5-7)</h2>
-        <p class="muted">Use as a checklist; treat each item as verifiable evidence, not narrative.</p>
-        <ul class="list-clean">
-          <li><strong>Core goals (3):</strong> reliability, security, user experience</li>
-          <li><strong>Initiatives (5):</strong> network design, redundancy, training, vendor verification, telemetry</li>
-          <li><strong>Milestones (7):</strong> design review, lab validation, pilot, documentation, training, failover test, post-launch audit</li>
-        </ul>
-        <div class="keyline"></div>
-        <h3>Definitions</h3>
-        <ul class="list-clean">
-          <li><strong>Observability:</strong> ability to infer system state from logs/metrics/traces</li>
-          <li><strong>Monitoring:</strong> alerting on SLO breaches with clear runbooks</li>
-          <li><strong>Interoperability:</strong> multi-vendor compatibility confirmed in a lab</li>
-          <li><strong>User adoption:</strong> tasks completed by target users without assistance</li>
-          <li><strong>Room acoustics:</strong> RT60, background noise, and STI within design targets</li>
-        </ul>
-      </div>
-    </section>
+        <fieldset>
+          <legend>Pillar 2: Security &amp; Policy</legend>
+          <div class="qrow">
+            <div><strong>Segmentation</strong><div class="hint">VRF/VLAN, ACLs, zero-trust policy</div></div>
+            <div class="opts" role="radiogroup" aria-label="Segmentation">
+              <label><input type="radio" name="q5" value="0" data-pillar="Security">Flat</label>
+              <label><input type="radio" name="q5" value="1" data-pillar="Security">Basic</label>
+              <label><input type="radio" name="q5" value="2" data-pillar="Security">Policy-driven</label>
+            </div>
+          </div>
+          <div class="qrow">
+            <div><strong>Identity &amp; Access</strong><div class="hint">802.1X/MAB, device inventory, RBAC</div></div>
+            <div class="opts" role="radiogroup" aria-label="Identity">
+              <label><input type="radio" name="q6" value="0" data-pillar="Security">Ad-hoc</label>
+              <label><input type="radio" name="q6" value="1" data-pillar="Security">Partial</label>
+              <label><input type="radio" name="q6" value="2" data-pillar="Security">Managed</label>
+            </div>
+          </div>
+          <div class="qrow">
+            <div><strong>Change Control</strong><div class="hint">CAB, windowing, rollback plan, audit trails</div></div>
+            <div class="opts" role="radiogroup" aria-label="Change">
+              <label><input type="radio" name="q12" value="0" data-pillar="Security">Informal</label>
+              <label><input type="radio" name="q12" value="1" data-pillar="Security">Partial</label>
+              <label><input type="radio" name="q12" value="2" data-pillar="Security">Disciplined</label>
+            </div>
+          </div>
+        </fieldset>
 
-    <section class="panel" aria-labelledby="worksheet">
-      <h2 id="worksheet">Worksheet</h2>
-      <p class="muted">Capture intent and evidence. One line per item. Keep sources and owners explicit.</p>
-      <form id="ws">
-        <h3>Core goals (3)</h3>
-        <div class="grid cols-3">
-          <input aria-label="Goal 1" placeholder="Goal 1 — owner / due / evidence" />
-          <input aria-label="Goal 2" placeholder="Goal 2 — owner / due / evidence" />
-          <input aria-label="Goal 3" placeholder="Goal 3 — owner / due / evidence" />
+        <fieldset>
+          <legend>Pillar 3: Operations &amp; Observability</legend>
+          <div class="qrow">
+            <div><strong>Routing &amp; API Orchestration</strong><div class="hint">Northbound APIs, repeatable provisioning</div></div>
+            <div class="opts" role="radiogroup" aria-label="Routing">
+              <label><input type="radio" name="q8" value="0" data-pillar="Operations">Manual</label>
+              <label><input type="radio" name="q8" value="1" data-pillar="Operations">Scripts</label>
+              <label><input type="radio" name="q8" value="2" data-pillar="Operations">Controller</label>
+            </div>
+          </div>
+          <div class="qrow">
+            <div><strong>Observability & Telemetry</strong><div class="hint">Telemetry for PTP, multicast, QoS, device health</div></div>
+            <div class="opts" role="radiogroup" aria-label="Observability">
+              <label><input type="radio" name="q9" value="0" data-pillar="Operations">None</label>
+              <label><input type="radio" name="q9" value="1" data-pillar="Operations">Partial</label>
+              <label><input type="radio" name="q9" value="2" data-pillar="Operations">Dashboards + alerts</label>
+            </div>
+          </div>
+          <div class="qrow">
+            <div><strong>Rollback &amp; Backups</strong><div class="hint">Golden configs, versioned restores, drills</div></div>
+            <div class="opts" role="radiogroup" aria-label="Rollback">
+              <label><input type="radio" name="q10" value="0" data-pillar="Operations">Ad-hoc</label>
+              <label><input type="radio" name="q10" value="1" data-pillar="Operations">Backups</label>
+              <label><input type="radio" name="q10" value="2" data-pillar="Operations">Tested DR</label>
+            </div>
+          </div>
+          <div class="qrow">
+            <div><strong>Pre-Launch Validation</strong><div class="hint">Load/latency tests, failure injection</div></div>
+            <div class="opts" role="radiogroup" aria-label="Prelaunch">
+              <label><input type="radio" name="q11" value="0" data-pillar="Operations">None</label>
+              <label><input type="radio" name="q11" value="1" data-pillar="Operations">Basic</label>
+              <label><input type="radio" name="q11" value="2" data-pillar="Operations">Formal</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="button" class="link-btn" id="recalcBtn" title="Recalculate score">Recalculate score</button>
+          <button type="button" id="exportBtn" disabled title="Subscribe to unlock your personalized action plan">Get My Personalized Action Plan</button>
         </div>
-        <div class="keyline"></div>
-        <h3>Initiatives (5)</h3>
-        <div class="grid cols-3">
-          <input aria-label="Initiative 1" placeholder="Initiative 1 — artifact / status" />
-          <input aria-label="Initiative 2" placeholder="Initiative 2 — artifact / status" />
-          <input aria-label="Initiative 3" placeholder="Initiative 3 — artifact / status" />
-          <input aria-label="Initiative 4" placeholder="Initiative 4 — artifact / status" />
-          <input aria-label="Initiative 5" placeholder="Initiative 5 — artifact / status" />
+        <div class="foot">Action Plan export is unlocked after you subscribe via the form. You will be redirected back to this page.</div>
+      </div>
+    </main>
+
+    <aside>
+      <div class="card" aria-live="polite" aria-atomic="true">
+        <h2>Your Readiness Score</h2>
+        <div class="kpi">
+          <div class="pill"><span class="muted">Total Score</span><div class="score-lg" id="scoreTotal">0</div></div>
+          <div class="pill"><span class="muted">Readiness</span><div id="scoreBucket" class="bucket risk">At Risk</div></div>
         </div>
-        <div class="keyline"></div>
-        <h3>Milestones (7)</h3>
-        <div class="grid cols-3">
-          <input aria-label="Milestone 1" placeholder="Design review — sign-off link" />
-          <input aria-label="Milestone 2" placeholder="Lab validation — test plan id" />
-          <input aria-label="Milestone 3" placeholder="Pilot — scope / exit criteria" />
-          <input aria-label="Milestone 4" placeholder="Documentation — location" />
-          <input aria-label="Milestone 5" placeholder="Training — curriculum / attendance" />
-          <input aria-label="Milestone 6" placeholder="Failover test — pass/fail" />
-          <input aria-label="Milestone 7" placeholder="Post-launch audit — findings" />
+        <div class="hr"></div>
+        <div class="chart-container">
+          <canvas id="scoreChart" role="img" aria-label="Readiness breakdown by pillar"></canvas>
         </div>
-        <div class="keyline"></div>
-        <button type="button" id="exportBtn">Export worksheet (.txt)</button>
-      </form>
-    </section>
-
-    <!-- QUALIFYING GATE -->
-<section class="panel" id="access">
-  <h2>Access worksheet export</h2>
-  <p class="muted">Provide work details to receive the export. Purpose: tailor follow-up; you can opt out anytime.</p>
-
-  <form id="qualForm" novalidate>
-    <div class="grid cols-2">
-      <div>
-        <label>Email (work) *</label>
-        <input type="email" name="email" required placeholder="name@company.com" />
+        <div class="hr"></div>
+        <div id="pillarScores"></div>
+        <div class="hr"></div>
+        <div class="notice">Get your personalized action plan (PDF) by subscribing below.</div>
       </div>
-      <div>
-        <label>Role *</label>
-        <select name="role" required>
-          <option value="">Select</option>
-          <option value="decision">Decision-maker</option>
-          <option value="influencer">Technical influencer</option>
-          <option value="user">End user</option>
-        </select>
+      <div class="card" id="subscribe">
+        <h2>Unlock Your Action Plan</h2>
+        <script>
+          (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);};
+          l=d.createElement(e);l.async=1;l.src=u;n=d.getElementsByTagName(e)[0];n.parentNode.insertBefore(l,n);})
+          (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+          ml('account','1191636');
+        </script>
+        <div class="ml-embedded" data-form="2yvzIn"></div>
+        <noscript>This form requires JavaScript.</noscript>
+        <p class="foot"></p>
       </div>
-      <div>
-        <label>Company size *</label>
-        <select name="size" required>
-          <option value="">Select</option>
-          <option value="200-1999">200–1,999</option>
-          <option value="2000+">2,000+</option>
-          <option value="<200"><200</option>
-        </select>
-      </div>
-      <div>
-        <label>Project timeline *</label>
-        <select name="timeline" required>
-          <option value="">Select</option>
-          <option value="0-3">0–3 months</option>
-          <option value="3-6">3–6 months</option>
-          <option value="6+">>6 months</option>
-        </select>
-      </div>
-      <div>
-        <label>Budget status *</label>
-        <select name="budget" required>
-          <option value="">Select</option>
-          <option value="approved">Approved</option>
-          <option value="planned">Planned</option>
-          <option value="none">None</option>
-        </select>
-      </div>
-      <div>
-        <label>AV-over-IP stack (vendors)</label>
-        <input type="text" name="stack" placeholder="e.g., Q-SYS, Dante, NDI, Crestron" />
-      </div>
-      <div class="cols-2" style="grid-column:1/-1">
-        <label>Primary challenge *</label>
-        <select name="challenge" required>
-          <option value="">Select</option>
-          <option value="downtime">Downtime risk</option>
-          <option value="interop">Interoperability</option>
-          <option value="observability">Observability/monitoring</option>
-          <option value="acoustics">Room performance</option>
-          <option value="adoption">User adoption</option>
-        </select>
-      </div>
-    </div>
-
-    <input type="hidden" name="utm_source" id="utm_source">
-    <input type="hidden" name="utm_medium" id="utm_medium">
-    <input type="hidden" name="utm_campaign" id="utm_campaign">
-    <input type="hidden" name="page_url" id="page_url">
-    <input type="hidden" name="timestamp" id="timestamp">
-
-    <div class="keyline"></div>
-    <label style="display:flex;gap:8px;align-items:flex-start">
-      <input type="checkbox" name="consent" required>
-      <span>I agree to receive the worksheet and related materials. Privacy policy linked here.</span>
-    </label>
-
-    <div class="keyline"></div>
-    <button type="submit" id="unlockBtn" disabled>Download My Assessment</button>
-    <div id="mqlBadge" class="muted" style="margin-top:8px"></div>
-  </form>
-</section>
-
-
-    <footer>
-      <div>©Flicktronix – Attribution: internal use. No marketing content. No data collected.</div>
-    </footer>
+    </aside>
   </div>
 
-  <script>
-"use strict";
+  <footer class="foot">
+    © Flicktronix. Vendor-neutral assessment.
+  </footer>
+</div>
 
-// ——— Helpers ———
-const $ = (sel, root = document) => root.querySelector(sel);
+<script>
+/* ---------- Gate export on redirect ---------- */
+(function gateExport(){
+  const u = new URL(location.href);
+  const exportBtn = document.getElementById("exportBtn");
+  if (u.searchParams.get("ok")==="1"){
+    exportBtn.removeAttribute("disabled");
+    exportBtn.title = "Download your personalized action plan (.pdf)";
+  }
+})();
 
-// ——— Scoring UI (risk check) ———
-document.addEventListener("DOMContentLoaded", () => {
-  const form = $("#scoreForm");
-  const scoreText = $("#scoreText");
-  const riskText = $("#riskText");
-  const bar = $("#bar");
-  const copyBtn = $("#copyBtn");
+/* ---------- Scoring ---------- */
+const PILLARS = {
+  "Design": { label: "Design & Interop", max: 10 },
+  "Security": { label: "Security & Policy", max: 6 },
+  "Operations": { label: "Operations & Observability", max: 8 }
+};
+const PILLAR_KEYS = Object.keys(PILLARS);
 
-  function calc(){
-    if(!form) return;
-    const fd = new FormData(form);
-    let s = 0;
-    ["obs","mon","intop","user","acoust"].forEach(k => { s += +(fd.get(k)||0) });
-    if(scoreText) scoreText.textContent = s;
-    if(bar){
-      const pct = Math.min(100, Math.round(s/25*100));
-      bar.style.width = pct + "%";
-      bar.style.background = s < 8 ? "var(--danger)" : (s <= 12 ? "var(--warn)" : "var(--ok)");
+function computeScore(){
+  let total = 0;
+  const byPillar = Object.fromEntries(PILLAR_KEYS.map(p => [p, 0]));
+  const maxScore = PILLAR_KEYS.reduce((sum, key) => sum + PILLARS[key].max, 0);
+
+  document.querySelectorAll('input[type="radio"][data-pillar]:checked').forEach(inp => {
+    const v = Number(inp.value || 0);
+    const pillar = inp.dataset.pillar;
+    if (byPillar.hasOwnProperty(pillar)) {
+      total += v;
+      byPillar[pillar] += v;
     }
-    if(riskText) riskText.textContent = s < 8 ? "High risk (0–7)" : (s <= 12 ? "Needs work (8–12)" : "Sound (13–25)");
-  }
-  if(form){
-    form.addEventListener("change", calc);
-    calc();
-  }
-  if(copyBtn){
-    copyBtn.addEventListener("click", async () => {
-      const txt = `Self-Assessment Score: ${scoreText ? scoreText.textContent : "0"}`;
-      try { await navigator.clipboard.writeText(txt); copyBtn.textContent = "Copied"; setTimeout(()=>copyBtn.textContent="Copy score",1200); }
-      catch(e){ alert(txt); }
-    });
-  }
-});
-
-// ——— Worksheet export ———
-function exportWorksheet(){
-  const ws = $("#ws") || $("#worksheet");
-  const inputs = ws ? Array.from(ws.querySelectorAll("input")) : [];
-  if (!inputs.length) return;
-  const lines = ["ProAV Infrastructure Worksheet",""];
-  const heads = ["Core goals","Initiatives","Milestones"];
-  const counts = [3,5,7];
-  let i = 0;
-  heads.forEach((h,idx)=>{
-    lines.push(h + ":");
-    for(let j=0;j<counts[idx];j++) lines.push("- " + (inputs[i++]?.value || ""));
-    lines.push("");
   });
-  const blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
-  const bucket = (localStorage.getItem("lead_bucket") || "ungated").toLowerCase();
-  const fname = `proav-worksheet-${bucket}.txt`;
-
-  // Legacy Edge fallback
-  if (window.navigator && "msSaveOrOpenBlob" in window.navigator) {
-    // @ts-ignore
-    window.navigator.msSaveOrOpenBlob(blob, fname);
-    return;
-  }
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = fname;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  return { total, byPillar, max: maxScore };
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const exportBtn = $("#exportBtn");
-  if (exportBtn) exportBtn.addEventListener("click", exportWorksheet);
-});
+function bucketFromScore(pct){
+  if (pct >= 80) return "Robust";
+  if (pct >= 50) return "Emerging";
+  return "At Risk";
+}
 
-// ——— Qualifying gate (optional; keeps export locked until form submit) ———
-document.addEventListener("DOMContentLoaded", () => {
-  const f = $("#qualForm");
-  const unlockBtn = $("#unlockBtn");
-  const badge = $("#mqlBadge");
-  const exportBtn = $("#exportBtn");
+function updateScoreUI(){
+  const { total, byPillar, max } = computeScore();
+  const pct = max > 0 ? Math.round((total / max) * 100) : 0;
+  const bucket = bucketFromScore(pct);
 
-  // Lock export by default if gate present
-  if (f && exportBtn){
-    exportBtn.setAttribute("disabled","disabled");
-    exportBtn.textContent = "Complete form to export";
+  document.getElementById("scoreTotal").textContent = `${total} / ${max}`;
+  const b = document.getElementById("scoreBucket");
+  b.textContent = bucket;
+  b.className = "bucket"; // Reset classes
+  if (bucket === "Robust") b.classList.add("good");
+  else if (bucket === "Emerging") b.classList.add("warn");
+  else b.classList.add("risk");
+
+  renderChart(byPillar);
+  renderPillarScores(byPillar);
+  return { score: total, bucket, pct, byPillar };
+}
+
+function renderPillarScores(byPillar) {
+    const container = document.getElementById("pillarScores");
+    let html = '<h3 style="margin:8px 0 6px">Pillar Breakdown</h3>';
+    PILLAR_KEYS.forEach(key => {
+        const score = byPillar[key] || 0;
+        const max = PILLARS[key].max;
+        const percent = max > 0 ? Math.round((score / max) * 100) : 0;
+        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 0;">
+                    <span><strong>${PILLARS[key].label}</strong></span>
+                    <span>${score} / ${max} (${percent}%)</span>
+                 </div>`;
+    });
+    container.innerHTML = html;
+}
+
+/* ---------- Chart ---------- */
+let chart;
+function renderChart(byPillar){
+  const ctx = document.getElementById('scoreChart').getContext('2d');
+  const data = PILLAR_KEYS.map(k => byPillar[k] || 0);
+  const labels = PILLAR_KEYS.map(k => PILLARS[k].label);
+
+  if (chart){
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = data;
+    chart.update();
+    return;
   }
 
-  if (!f) return;
-
-  ["email","role","size","timeline","budget","challenge","consent"].forEach(n=>{
-    const el = f.elements[n];
-    if(!el) return;
-    el.addEventListener("input", validate);
-    el.addEventListener("change", validate);
-  });
-
-  function validate(){
-    const need = ["email","role","size","timeline","budget","challenge","consent"];
-    const requiredOk = need.every(n => n==="consent" ? f.elements[n]?.checked : !!f.elements[n]?.value);
-    const em = (f.elements.email?.value || "").trim();
-    const isWork = em && !/@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com|aol\.com|icloud\.com)$/i.test(em);
-    if(unlockBtn) unlockBtn.disabled = !(requiredOk && isWork);
-  }
-
-  function scoreLead(){
-    let s = 0;
-    const role = f.elements.role?.value;
-    const size = f.elements.size?.value;
-    const t = f.elements.timeline?.value;
-    const b = f.elements.budget?.value;
-    const stack = (f.elements.stack?.value || "").toLowerCase();
-    const ch = f.elements.challenge?.value;
-
-    s += role==="decision" ? 8 : role==="influencer" ? 5 : 2;
-    s += size==="200-1999" ? 10 : size==="2000+" ? 8 : 2;
-    s += t==="0-3" ? 8 : t==="3-6" ? 5 : 2;
-    s += b==="approved" ? 8 : b==="planned" ? 5 : 1;
-    if (/(q-sys|qsc|dante|ndi|crestron|extron|sdp|avb)/.test(stack)) s += 6;
-    s += ch==="downtime" ? 6 : (ch ? 3 : 0);
-
-    const bucket = s >= 28 ? "MQL" : s >= 18 ? "Nurture" : "Disqualify";
-    return {score:s, bucket};
-  }
-
-  // Tracking fields
-  const p = new URLSearchParams(location.search);
-  const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
-  setVal("page_url", location.href);
-  setVal("utm_source", p.get("utm_source") || p.get("utm") || "");
-  setVal("utm_medium", p.get("utm_medium") || "");
-  setVal("utm_campaign", p.get("utm_campaign") || "");
-  setVal("timestamp", new Date().toISOString());
-
-  f.addEventListener("submit", e => {
-    e.preventDefault();
-    const {score, bucket} = scoreLead();
-    localStorage.setItem("lead_score", String(score));
-    localStorage.setItem("lead_bucket", bucket);
-    if (badge) badge.textContent = `Lead score ${score} — ${bucket}`;
-
-    // TODO: send to backend/CRM if available
-    // fetch("/api/lead", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(new FormData(f)))}).catch(()=>{});
-
-    // Unlock export
-    if (exportBtn){
-      exportBtn.removeAttribute("disabled");
-      exportBtn.textContent = "Export worksheet (.txt)";
+  chart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Pillar Score',
+        data,
+        fill: true,
+        backgroundColor: 'rgba(11, 95, 255, 0.2)',
+        borderColor: 'rgb(11, 95, 255)',
+        pointBackgroundColor: 'rgb(11, 95, 255)',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { r: { suggestedMin: 0, suggestedMax: 10, ticks: { stepSize: 2 } } }
     }
   });
+}
 
-  validate();
+/* ---------- Export to PDF ---------- */
+function getPriorityAdvice(byPillar) {
+    let lowestPillar = '', lowestPercent = 101;
+    PILLAR_KEYS.forEach(key => {
+        const score = byPillar[key] || 0;
+        const max = PILLARS[key].max;
+        const percent = max > 0 ? (score / max) * 100 : 0;
+        if (percent < lowestPercent) {
+            lowestPercent = percent;
+            lowestPillar = key;
+        }
+    });
+    const advice = {
+        "Design": "Your lowest score is in Design & Interop. This suggests foundational risks in system timing, media transport, and compatibility. Focus on validating your PTP/clocking design, engineering your multicast network with IGMP, and implementing end-to-end QoS.",
+        "Security": "Your lowest score is in Security & Policy. Your system may be vulnerable to unauthorized access or disruptive changes. Focus on implementing network segmentation (VLANs), developing an access control policy (802.1X), and establishing formal change control.",
+        "Operations": "Your lowest score is in Operations & Observability. This indicates challenges in monitoring, troubleshooting, and recovery. Focus on deploying monitoring tools for telemetry, establishing automated configuration backups, and creating/testing a disaster recovery plan."
+    };
+    return advice[lowestPillar] || "Review all pillars to identify specific areas for improvement.";
+}
+
+function exportWorksheet(){
+  const { score, bucket, pct, byPillar } = updateScoreUI();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const margin = 15;
+  let yPos = 20;
+
+  // Header
+  doc.setFontSize(20);
+  doc.text("Flicktronix AV Readiness Action Plan", margin, yPos);
+  yPos += 15;
+
+  // Summary
+  doc.setFontSize(12);
+  doc.text(`Overall Readiness Score: ${score} / ${PILLAR_KEYS.reduce((sum, key) => sum + PILLARS[key].max, 0)} (${pct}%)`, margin, yPos);
+  yPos += 7;
+  doc.text(`Assessment: Your current readiness is rated as '${bucket}'.`, margin, yPos);
+  yPos += 15;
+
+  // Pillar Breakdown
+  doc.setFontSize(14);
+  doc.text("Breakdown by Pillar", margin, yPos);
+  yPos += 10;
+  doc.setFontSize(11);
+  PILLAR_KEYS.forEach(key => {
+    const pScore = byPillar[key] || 0;
+    const pMax = PILLARS[key].max;
+    const pPct = pMax > 0 ? Math.round((pScore / pMax) * 100) : 0;
+    doc.text(`- ${PILLARS[key].label}: ${pScore} / ${pMax} (${pPct}%)`, margin + 5, yPos);
+    yPos += 7;
+  });
+  yPos += 10;
+  
+  // Recommended Next Steps
+  doc.setFontSize(14);
+  doc.text("Recommended Next Steps", margin, yPos);
+  yPos += 10;
+  doc.setFontSize(11);
+  const advice = getPriorityAdvice(byPillar);
+  const adviceLines = doc.splitTextToSize(advice, 180); // wrap text
+  doc.text(adviceLines, margin, yPos);
+  yPos += (adviceLines.length * 5) + 10;
+
+  // Call to Action
+  doc.setFontSize(14);
+  doc.text("Book Your Complimentary Blueprint Review", margin, yPos);
+  yPos += 10;
+  doc.setFontSize(11);
+  const ctaText = "Ready to build a hardened, zero-downtime design? Book a free call with a Flicktronix expert to review your results and create a custom roadmap. [Enter your booking link here]";
+  const ctaLines = doc.splitTextToSize(ctaText, 180);
+  doc.text(ctaLines, margin, yPos);
+  
+  // Save the PDF
+  doc.save("Flicktronix_AV_Action_Plan.pdf");
+}
+
+/* ---------- Wire-up ---------- */
+document.addEventListener("change", (e)=>{
+  if (e.target.matches('input[type="radio"][data-pillar]')) updateScoreUI();
 });
-</script>
+document.getElementById("recalcBtn").addEventListener("click", updateScoreUI);
+document.getElementById("exportBtn").addEventListener("click", exportWorksheet);
 
+// Initial render
+updateScoreUI();
+</script>
 </body>
 </html>
