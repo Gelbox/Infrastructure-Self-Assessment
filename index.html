@@ -1,13 +1,26 @@
 <!doctype html>
 <html lang="en">
 <head>
+<link rel="preconnect" href="https://assets.mailerlite.com" crossorigin>
 <meta charset="utf-8" />
 <meta http-equiv="x-ua-compatible" content="ie=edge" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>AV Solution 3-Pillar Readiness Scorecard</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- MailerLite Universal (required for JS embed) -->
+<script>
+  (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[]).push(arguments);};
+  l=d.createElement(e);l.async=1;l.src=u;n=d.getElementsByTagName(e)[0];n.parentNode.insertBefore(l,n);})
+  (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+  ml('account','1191636');
+</script>
+<script>
+  /* Fires after successful submit; unlocks export by redirecting with ok=1 */
+  function ml_webform_success_31574996(){
+    try { window.top.location.href = 'https://gelbox.github.io/Infrastructure-Self-Assessment/?ok=1#top'; }
+    catch(e){ window.location.href = 'https://gelbox.github.io/Infrastructure-Self-Assessment/?ok=1#top'; }
+  }
+</script>
 
 <style>
   :root{
@@ -23,16 +36,17 @@
     --risk:#c62828;
     --radius:16px;
   }
+  .chart-container{position:relative;height:250px;width:100%}
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}
   a{color:var(--accent);text-decoration:none}
   a:focus{outline:2px solid var(--accent)}
   .wrap{max-width:1100px;margin-inline:auto;padding:32px 20px}
   header{display:grid;gap:8px;margin-bottom:20px}
   h1{font-size:34px;line-height:1.2;margin:0 0 2px}
   .sub{color:var(--muted)}
-  .grid{display:grid;grid-template-columns:1.2fr .8fr; gap:20px}
-  @media (max-width: 980px){ .grid{grid-template-columns:1fr; } }
+  .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}
+  @media (max-width:980px){.grid{grid-template-columns:1fr}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
   .card h2{font-size:20px;margin:0 0 12px}
   .muted{color:var(--muted)}
@@ -58,7 +72,6 @@
   .foot{margin-top:18px;font-size:13px;color:var(--muted)}
   .hr{height:1px;background:var(--line);margin:20px 0}
   .notice{background:#fff8e1;border:1px solid #ffe5a7;border-radius:12px;padding:10px 12px}
-  .chart-container{position:relative;height:250px;width:100%}
   .ml-embedded{isolation:isolate}
 </style>
 </head>
@@ -78,6 +91,7 @@
 
         <fieldset>
           <legend>Pillar 1: Design &amp; Interop</legend>
+
           <div class="qrow">
             <div><strong>PTP Domain Design</strong><div class="hint">Dedicated domains, BMCA strategy, GM resilience</div></div>
             <div class="opts" role="radiogroup" aria-label="PTP domain design">
@@ -86,6 +100,7 @@
               <label><input type="radio" name="q1" value="2" data-pillar="Design">Documented</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>Grandmaster Redundancy</strong><div class="hint">Dual GM, holdover, failover tests</div></div>
             <div class="opts" role="radiogroup" aria-label="Grandmaster redundancy">
@@ -94,6 +109,7 @@
               <label><input type="radio" name="q2" value="2" data-pillar="Design">Active failover</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>Multicast Safety</strong><div class="hint">IGMPv3, PIM/SDM, RP/BSR, guardrails</div></div>
             <div class="opts" role="radiogroup" aria-label="Multicast safety">
@@ -102,6 +118,7 @@
               <label><input type="radio" name="q3" value="2" data-pillar="Design">Engineered</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>QoS &amp; Queues</strong><div class="hint">LLQ/priority, policing, WRED disabled where needed</div></div>
             <div class="opts" role="radiogroup" aria-label="QoS">
@@ -110,6 +127,7 @@
               <label><input type="radio" name="q4" value="2" data-pillar="Design">End-to-end</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>Open Standards Adoption</strong><div class="hint">NMOS, AES67/ST 2110 interop validated</div></div>
             <div class="opts" role="radiogroup" aria-label="Standards">
@@ -122,6 +140,7 @@
 
         <fieldset>
           <legend>Pillar 2: Security &amp; Policy</legend>
+
           <div class="qrow">
             <div><strong>Segmentation</strong><div class="hint">VRF/VLAN, ACLs, zero-trust policy</div></div>
             <div class="opts" role="radiogroup" aria-label="Segmentation">
@@ -130,6 +149,7 @@
               <label><input type="radio" name="q5" value="2" data-pillar="Security">Policy-driven</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>Identity &amp; Access</strong><div class="hint">802.1X/MAB, device inventory, RBAC</div></div>
             <div class="opts" role="radiogroup" aria-label="Identity">
@@ -138,6 +158,7 @@
               <label><input type="radio" name="q6" value="2" data-pillar="Security">Managed</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>Change Control</strong><div class="hint">CAB, windowing, rollback plan, audit trails</div></div>
             <div class="opts" role="radiogroup" aria-label="Change">
@@ -150,6 +171,7 @@
 
         <fieldset>
           <legend>Pillar 3: Operations &amp; Observability</legend>
+
           <div class="qrow">
             <div><strong>Routing &amp; API Orchestration</strong><div class="hint">Northbound APIs, repeatable provisioning</div></div>
             <div class="opts" role="radiogroup" aria-label="Routing">
@@ -158,6 +180,7 @@
               <label><input type="radio" name="q8" value="2" data-pillar="Operations">Controller</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>Observability & Telemetry</strong><div class="hint">Telemetry for PTP, multicast, QoS, device health</div></div>
             <div class="opts" role="radiogroup" aria-label="Observability">
@@ -166,6 +189,7 @@
               <label><input type="radio" name="q9" value="2" data-pillar="Operations">Dashboards + alerts</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>Rollback &amp; Backups</strong><div class="hint">Golden configs, versioned restores, drills</div></div>
             <div class="opts" role="radiogroup" aria-label="Rollback">
@@ -174,6 +198,7 @@
               <label><input type="radio" name="q10" value="2" data-pillar="Operations">Tested DR</label>
             </div>
           </div>
+
           <div class="qrow">
             <div><strong>Pre-Launch Validation</strong><div class="hint">Load/latency tests, failure injection</div></div>
             <div class="opts" role="radiogroup" aria-label="Prelaunch">
@@ -186,9 +211,9 @@
 
         <div class="actions">
           <button type="button" class="link-btn" id="recalcBtn" title="Recalculate score">Recalculate score</button>
-          <button type="button" id="exportBtn" disabled title="Fill the form to unlock your personalized action plan">Get My Personalized Action Plan</button>
+          <button type="button" id="exportBtn" disabled title="Subscribe to unlock your personalized action plan">Get My Personalized Action Plan</button>
         </div>
-        <div class="foot">Action Plan export is unlocked after filling the form. You will be redirected back to this page.</div>
+        <div class="foot">Action Plan export is unlocked after you subscribe via the form. You will be redirected back to this page.</div>
       </div>
     </main>
 
@@ -196,38 +221,44 @@
       <div class="card" aria-live="polite" aria-atomic="true">
         <h2>Your Readiness Score</h2>
         <div class="kpi">
-          <div class="pill"><span class="muted">Total Score</span><div class="score-lg" id="scoreTotal">0</div></div>
+          <div class="pill"><span class="muted">Total</span><div class="score-lg" id="scoreTotal">0%</div><div class="muted" id="scoreRaw" style="font-size:12px;">0 / 24</div></div>
           <div class="pill"><span class="muted">Readiness</span><div id="scoreBucket" class="bucket risk">At Risk</div></div>
+          <div class="pill"><span class="muted">TCO Multiplier</span><div class="score-lg" id="tcoMult">1.00×</div></div>
         </div>
+
         <div class="hr"></div>
+
         <div class="chart-container">
           <canvas id="scoreChart" role="img" aria-label="Readiness breakdown by pillar"></canvas>
         </div>
+
         <div class="hr"></div>
+
         <div id="pillarScores"></div>
+
         <div class="hr"></div>
-        <div class="notice">Get your personalized action plan (PDF) by filling the form below.</div>
+
+        <div class="notice">Get your personalized action plan by subscribing below.</div>
       </div>
-      <div class="card" id="Unlock Your Action Plan">
+
+      <div class="card" id="subscribe">
         <h2>Unlock Your Action Plan</h2>
-        <script>
-    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-    ml('account', '1191636');
-</script>
+
+        <!-- MailerLite JS embed target -->
         <div class="ml-embedded" data-form="2yvzIn"></div>
         <noscript>This form requires JavaScript.</noscript>
-        <p class="foot"></p>
+
+        <p class="foot">Subscriptions are processed by MailerLite.</p>
       </div>
     </aside>
   </div>
 
   <footer class="foot">
-    © Flicktronix. Vendor-neutral assessment.
+    © Flicktronix. Vendor-neutral assessment. No client data is collected beyond form fields handled by MailerLite.
   </footer>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
 <script>
 /* ---------- Gate export on redirect ---------- */
@@ -236,7 +267,9 @@
   const exportBtn = document.getElementById("exportBtn");
   if (u.searchParams.get("ok")==="1"){
     exportBtn.removeAttribute("disabled");
-    exportBtn.title = "Download your personalized action plan (.pdf)";
+    exportBtn.title = "Download your personalized action plan (.txt)";
+  } else {
+    exportBtn.title = "Subscribe to unlock your personalized action plan";
   }
 })();
 
@@ -253,7 +286,8 @@ function computeScore(){
   const byPillar = Object.fromEntries(PILLAR_KEYS.map(p => [p, 0]));
   const maxScore = PILLAR_KEYS.reduce((sum, key) => sum + PILLARS[key].max, 0);
 
-  document.querySelectorAll('input[type="radio"][data-pillar]:checked').forEach(inp => {
+  const inputs = document.querySelectorAll('input[type="radio"][data-pillar]:checked');
+  inputs.forEach(inp => {
     const v = Number(inp.value || 0);
     const pillar = inp.dataset.pillar;
     if (byPillar.hasOwnProperty(pillar)) {
@@ -261,7 +295,12 @@ function computeScore(){
       byPillar[pillar] += v;
     }
   });
-  return { total, byPillar, max: maxScore };
+
+  const pct = maxScore > 0 ? Math.round((total / maxScore) * 100) : 0;
+  const shortfall = Math.max(0, 70 - pct);
+  const tcoMultiplier = +(1 + (shortfall / 100) * 0.5).toFixed(2);
+
+  return { total, byPillar, max: maxScore, pct, tcoMultiplier };
 }
 
 function bucketFromScore(pct){
@@ -271,36 +310,40 @@ function bucketFromScore(pct){
 }
 
 function updateScoreUI(){
-  const { total, byPillar, max } = computeScore();
-  const pct = max > 0 ? Math.round((total / max) * 100) : 0;
+  const { total, byPillar, max, pct, tcoMultiplier } = computeScore();
   const bucket = bucketFromScore(pct);
 
-  document.getElementById("scoreTotal").textContent = `${total} / ${max}`;
+  document.getElementById("scoreTotal").textContent = `${pct}%`;
+  document.getElementById("scoreRaw").textContent = `${total} / ${max}`;
+
   const b = document.getElementById("scoreBucket");
   b.textContent = bucket;
-  b.className = "bucket"; // Reset classes
+  b.classList.remove("good","warn","risk");
   if (bucket === "Robust") b.classList.add("good");
   else if (bucket === "Emerging") b.classList.add("warn");
   else b.classList.add("risk");
 
+  document.getElementById("tcoMult").textContent = `${tcoMultiplier.toFixed(2)}×`;
+
   renderChart(byPillar);
   renderPillarScores(byPillar);
-  return { score: total, bucket, pct, byPillar };
+
+  return { score: total, bucket, pct, byPillar, tcoMultiplier };
 }
 
 function renderPillarScores(byPillar) {
-    const container = document.getElementById("pillarScores");
-    let html = '<h3 style="margin:8px 0 6px">Pillar Breakdown</h3>';
-    PILLAR_KEYS.forEach(key => {
-        const score = byPillar[key] || 0;
-        const max = PILLARS[key].max;
-        const percent = max > 0 ? Math.round((score / max) * 100) : 0;
-        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 0;">
-                    <span><strong>${PILLARS[key].label}</strong></span>
-                    <span>${score} / ${max} (${percent}%)</span>
-                 </div>`;
-    });
-    container.innerHTML = html;
+  const container = document.getElementById("pillarScores");
+  let html = '<h3 style="margin:8px 0 6px">Pillar Breakdown</h3>';
+  PILLAR_KEYS.forEach(key => {
+    const score = byPillar[key] || 0;
+    const max = PILLARS[key].max;
+    const percent = max > 0 ? Math.round((score / max) * 100) : 0;
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
+               <span><strong>${PILLARS[key].label}</strong></span>
+               <span>${score} / ${max} (${percent}%)</span>
+             </div>`;
+  });
+  container.innerHTML = html;
 }
 
 /* ---------- Chart ---------- */
@@ -309,10 +352,12 @@ function renderChart(byPillar){
   const ctx = document.getElementById('scoreChart').getContext('2d');
   const data = PILLAR_KEYS.map(k => byPillar[k] || 0);
   const labels = PILLAR_KEYS.map(k => PILLARS[k].label);
+  const maxValues = PILLAR_KEYS.map(k => PILLARS[k].max);
 
   if (chart){
     chart.data.labels = labels;
     chart.data.datasets[0].data = data;
+    chart.options.scales.r.suggestedMax = Math.max(...maxValues); /* fix: use suggestedMax */
     chart.update();
     return;
   }
@@ -328,91 +373,102 @@ function renderChart(byPillar){
         backgroundColor: 'rgba(11, 95, 255, 0.2)',
         borderColor: 'rgb(11, 95, 255)',
         pointBackgroundColor: 'rgb(11, 95, 255)',
+        pointBorderColor: '#fff',
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: 'rgb(11, 95, 255)'
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
-      scales: { r: { suggestedMin: 0, suggestedMax: 10, ticks: { stepSize: 2 } } }
+      scales: {
+        r: {
+          suggestedMin: 0,
+          suggestedMax: Math.max(...maxValues),
+          ticks: { stepSize: 2 }
+        }
+      }
     }
   });
 }
 
-/* ---------- Export to PDF ---------- */
+/* ---------- Export ---------- */
 function getPriorityAdvice(byPillar) {
-    let lowestPillar = '', lowestPercent = 101;
-    PILLAR_KEYS.forEach(key => {
-        const score = byPillar[key] || 0;
-        const max = PILLARS[key].max;
-        const percent = max > 0 ? (score / max) * 100 : 0;
-        if (percent < lowestPercent) {
-            lowestPercent = percent;
-            lowestPillar = key;
-        }
-    });
-    const advice = {
-        "Design": "Your lowest score is in Design & Interop. This suggests foundational risks in system timing, media transport, and compatibility. Focus on validating your PTP/clocking design, engineering your multicast network with IGMP, and implementing end-to-end QoS.",
-        "Security": "Your lowest score is in Security & Policy. Your system may be vulnerable to unauthorized access or disruptive changes. Focus on implementing network segmentation (VLANs), developing an access control policy (802.1X), and establishing formal change control.",
-        "Operations": "Your lowest score is in Operations & Observability. This indicates challenges in monitoring, troubleshooting, and recovery. Focus on deploying monitoring tools for telemetry, establishing automated configuration backups, and creating/testing a disaster recovery plan."
-    };
-    return advice[lowestPillar] || "Review all pillars to identify specific areas for improvement.";
+  let lowestPillar = '';
+  let lowestPercent = 101;
+
+  PILLAR_KEYS.forEach(key => {
+    const score = byPillar[key] || 0;
+    const max = PILLARS[key].max;
+    const percent = max > 0 ? (score / max) * 100 : 0;
+    if (percent < lowestPercent) {
+      lowestPercent = percent;
+      lowestPillar = key;
+    }
+  });
+
+  const advice = {
+    "Design": [
+      "Your lowest score is in Design & Interop. This suggests foundational risks in system timing, media transport, and compatibility.",
+      "Immediate Focus Areas:",
+      "- Validate your PTP/clocking design, ensuring you have a resilient Grandmaster strategy.",
+      "- Engineer your multicast network with IGMP Snooping/Querier and proper boundaries to prevent flooding.",
+      "- Implement end-to-end QoS to protect critical AV flows from packet loss and jitter."
+    ],
+    "Security": [
+      "Your lowest score is in Security & Policy. Your system may be vulnerable to unauthorized access or disruptive changes.",
+      "Immediate Focus Areas:",
+      "- Implement network segmentation (VLANs/VRFs) to isolate AV traffic from general corporate traffic.",
+      "- Develop an access control policy using 802.1X or MAB to ensure only authorized devices can connect.",
+      "- Establish a formal change control process (CAB, maintenance windows) to prevent unplanned outages."
+    ],
+    "Operations": [
+      "Your lowest score is in Operations & Observability. This indicates potential challenges in monitoring, troubleshooting, and recovering from failures.",
+      "Immediate Focus Areas:",
+      "- Deploy monitoring tools to gain telemetry on PTP sync, multicast flows, and QoS drops.",
+      "- Establish an automated backup process for all critical device configurations.",
+      "- Create and test a disaster recovery (DR) plan, including rollback procedures for failed changes."
+    ]
+  };
+
+  return advice[lowestPillar] || ["Review all pillars to identify specific areas for improvement."];
 }
 
 function exportWorksheet(){
-  const { score, bucket, pct, byPillar } = updateScoreUI();
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const margin = 15;
-  let yPos = 20;
+  const { score, bucket, pct, byPillar, tcoMultiplier } = updateScoreUI();
 
-  // Header
-  doc.setFontSize(20);
-  doc.text("Flicktronix AV Readiness Action Plan", margin, yPos);
-  yPos += 15;
-
-  // Summary
-  doc.setFontSize(12);
-  doc.text(`Overall Readiness Score: ${score} / ${PILLAR_KEYS.reduce((sum, key) => sum + PILLARS[key].max, 0)} (${pct}%)`, margin, yPos);
-  yPos += 7;
-  doc.text(`Assessment: Your current readiness is rated as '${bucket}'.`, margin, yPos);
-  yPos += 15;
-
-  // Pillar Breakdown
-  doc.setFontSize(14);
-  doc.text("Breakdown by Pillar", margin, yPos);
-  yPos += 10;
-  doc.setFontSize(11);
+  const lines = [];
+  lines.push("Flicktronix AV Readiness — Executive Action Plan");
+  lines.push("================================================");
+  lines.push("");
+  lines.push(`Overall Readiness: ${pct}%  |  Tier: ${bucket}  |  Estimated TCO Multiplier: ${tcoMultiplier}×`);
+  lines.push("");
+  lines.push("--- Pillar Breakdown ---");
   PILLAR_KEYS.forEach(key => {
     const pScore = byPillar[key] || 0;
     const pMax = PILLARS[key].max;
     const pPct = pMax > 0 ? Math.round((pScore / pMax) * 100) : 0;
-    doc.text(`- ${PILLARS[key].label}: ${pScore} / ${pMax} (${pPct}%)`, margin + 5, yPos);
-    yPos += 7;
+    lines.push(`- ${PILLARS[key].label}: ${pPct}% (${pScore} / ${pMax})`);
   });
-  yPos += 10;
-  
-  // Recommended Next Steps
-  doc.setFontSize(14);
-  doc.text("Recommended Next Steps", margin, yPos);
-  yPos += 10;
-  doc.setFontSize(11);
-  const advice = getPriorityAdvice(byPillar);
-  const adviceLines = doc.splitTextToSize(advice, 180); // wrap text
-  doc.text(adviceLines, margin, yPos);
-  yPos += (adviceLines.length * 5) + 10;
+  lines.push("");
+  lines.push("--- Recommended Next Steps ---");
+  getPriorityAdvice(byPillar).forEach(line => lines.push(line));
+  lines.push("");
+  lines.push("--- 20-Minute Readout ---");
+  lines.push("We’ll validate assumptions and map a 3-week stabilization plan (guardrails + quick wins).");
+  lines.push(">>> [Insert your booking link]");
+  lines.push("");
 
-  // Call to Action
-  doc.setFontSize(14);
-  doc.text("Book Your Complimentary Blueprint Review", margin, yPos);
-  yPos += 10;
-  doc.setFontSize(11);
-  const ctaText = "Ready to build a hardened, zero-downtime design? Book a free call with a Flicktronix expert to review your results and create a custom roadmap. https://calendar.app.google/ogQJjwwNoePqJ33QA";
-  const ctaLines = doc.splitTextToSize(ctaText, 180);
-  doc.text(ctaLines, margin, yPos);
-  
-  // Save the PDF
-  doc.save("Flicktronix_AV_Action_Plan.pdf");
+  const blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Flicktronix_AV_Action_Plan.txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 /* ---------- Wire-up ---------- */
@@ -422,7 +478,7 @@ document.addEventListener("change", (e)=>{
 document.getElementById("recalcBtn").addEventListener("click", updateScoreUI);
 document.getElementById("exportBtn").addEventListener("click", exportWorksheet);
 
-// Initial render
+/* Initial render */
 updateScoreUI();
 </script>
 </body>
