@@ -260,7 +260,7 @@
   function unlock(){
     if(!exportBtn) return;
     exportBtn.removeAttribute("disabled");
-    exportBtn.title = "Download your personalized action plan (.txt)";
+    exportBtn.title = "Download your personalized action plan (.pdf)";
   }
   window.unlockExport = unlock;               // expose for other callbacks
   if (localStorage.getItem("ml_ok")==="1") unlock();
