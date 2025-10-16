@@ -15,16 +15,12 @@
   ml('account','1191636');
 </script>
 
-<!-- CHANGE #1: unlock locally; no redirect -->
+<!-- Optional: if ML does call this, we unlock too -->
 <script>
   function ml_webform_success_31574996(){
     try {
       localStorage.setItem('ml_ok','1');
-      var btn = document.getElementById('exportBtn');
-      if (btn){
-        btn.removeAttribute('disabled');
-        btn.title = 'Download your personalized action plan (.txt)';
-      }
+      if (window.unlockExport) window.unlockExport();
     } catch(e){}
     return false;
   }
@@ -32,17 +28,8 @@
 
 <style>
   :root{
-    --bg:#ffffff;
-    --ink:#0b1f35;
-    --muted:#5b6b7e;
-    --panel:#f3f6f9;
-    --line:#e3e8ef;
-    --accent:#0b5fff;
-    --accent-ink:#ffffff;
-    --good:#1a7f37;
-    --warn:#ffb100;
-    --risk:#c62828;
-    --radius:16px;
+    --bg:#ffffff; --ink:#0b1f35; --muted:#5b6b7e; --panel:#f3f6f9; --line:#e3e8ef;
+    --accent:#0b5fff; --accent-ink:#ffffff; --good:#1a7f37; --warn:#ffb100; --risk:#c62828; --radius:16px;
   }
   .chart-container{position:relative;height:250px;width:100%}
   *{box-sizing:border-box}
@@ -251,6 +238,7 @@
 
       <div class="card" id="subscribe">
         <h2>Unlock Your Action Plan</h2>
+        <!-- JS Embed target -->
         <div class="ml-embedded" data-form="2yvzIn"></div>
         <noscript>This form requires JavaScript.</noscript>
         <p class="foot">Subscriptions are processed by MailerLite.</p>
@@ -266,29 +254,41 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
 <script>
-/* CHANGE #2: local unlock (no URL param) + postMessage fallback */
-(function gateExport(){
+/* Unlock helpers + listeners */
+(function(){
   var exportBtn = document.getElementById("exportBtn");
   function unlock(){
     if(!exportBtn) return;
     exportBtn.removeAttribute("disabled");
     exportBtn.title = "Download your personalized action plan (.txt)";
   }
+  window.unlockExport = unlock;               // expose for other callbacks
   if (localStorage.getItem("ml_ok")==="1") unlock();
 
-  // Fallback: some ML embeds post a success message
+  // Some ML variants postMessage on success
   window.addEventListener("message", function(ev){
     try{
       var d = ev.data;
-      if (typeof d === "string" && d.indexOf("ml:form:success") !== -1) {
-        localStorage.setItem("ml_ok","1");
-        unlock();
-      } else if (d && d.type === "ml:form:success") {
+      if ((typeof d === "string" && d.indexOf("ml:form:success") !== -1) ||
+          (d && d.type === "ml:form:success")) {
         localStorage.setItem("ml_ok","1");
         unlock();
       }
     }catch(e){}
   }, false);
+
+  // Robust path: watch injected DOM for success body becoming visible
+  var host = document.getElementById('subscribe');
+  if (host) {
+    var mo = new MutationObserver(function(){
+      var okPane = host.querySelector('.ml-form-successBody');
+      if (okPane && getComputedStyle(okPane).display !== 'none') {
+        localStorage.setItem("ml_ok","1");
+        unlock();
+      }
+    });
+    mo.observe(host, {subtree:true, attributes:true, childList:true, attributeFilter:['style','class']});
+  }
 })();
 </script>
 
@@ -403,11 +403,7 @@ function renderChart(byPillar){
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        r: {
-          suggestedMin: 0,
-          suggestedMax: Math.max(...maxValues),
-          ticks: { stepSize: 2 }
-        }
+        r: { suggestedMin: 0, suggestedMax: Math.max(...maxValues), ticks: { stepSize: 2 } }
       }
     }
   });
@@ -495,7 +491,7 @@ function exportWorksheet(){
 document.addEventListener("change", (e)=>{
   if (e.target.matches('input[type="radio"][data-pillar]')) updateScoreUI();
 });
-document.getElementById("recalcBtn").addEventListener("click", updateScoreUI());
+document.getElementById("recalcBtn").addEventListener("click", updateScoreUI);
 document.getElementById("exportBtn").addEventListener("click", exportWorksheet);
 
 /* Initial render */
