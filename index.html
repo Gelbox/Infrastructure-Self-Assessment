@@ -14,11 +14,19 @@
   (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
   ml('account','1191636');
 </script>
+
+<!-- CHANGE #1: unlock locally; no redirect -->
 <script>
-  /* Fires after successful submit; unlocks export by redirecting with ok=1 */
   function ml_webform_success_31574996(){
-    try { window.top.location.href = 'https://gelbox.github.io/Infrastructure-Self-Assessment/?ok=1#top'; }
-    catch(e){ window.location.href = 'https://gelbox.github.io/Infrastructure-Self-Assessment/?ok=1#top'; }
+    try {
+      localStorage.setItem('ml_ok','1');
+      var btn = document.getElementById('exportBtn');
+      if (btn){
+        btn.removeAttribute('disabled');
+        btn.title = 'Download your personalized action plan (.txt)';
+      }
+    } catch(e){}
+    return false;
   }
 </script>
 
@@ -213,7 +221,7 @@
           <button type="button" class="link-btn" id="recalcBtn" title="Recalculate score">Recalculate score</button>
           <button type="button" id="exportBtn" disabled title="Subscribe to unlock your personalized action plan">Get My Personalized Action Plan</button>
         </div>
-        <div class="foot">Action Plan export is unlocked after you subscribe via the form. You will be redirected back to this page.</div>
+        <div class="foot">Action Plan export is unlocked after you subscribe via the form.</div>
       </div>
     </main>
 
@@ -243,11 +251,8 @@
 
       <div class="card" id="subscribe">
         <h2>Unlock Your Action Plan</h2>
-
-        <!-- MailerLite JS embed target -->
         <div class="ml-embedded" data-form="2yvzIn"></div>
         <noscript>This form requires JavaScript.</noscript>
-
         <p class="foot">Subscriptions are processed by MailerLite.</p>
       </div>
     </aside>
@@ -261,18 +266,33 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
 <script>
-/* ---------- Gate export on redirect ---------- */
+/* CHANGE #2: local unlock (no URL param) + postMessage fallback */
 (function gateExport(){
-  const u = new URL(location.href);
-  const exportBtn = document.getElementById("exportBtn");
-  if (u.searchParams.get("ok")==="1"){
+  var exportBtn = document.getElementById("exportBtn");
+  function unlock(){
+    if(!exportBtn) return;
     exportBtn.removeAttribute("disabled");
     exportBtn.title = "Download your personalized action plan (.txt)";
-  } else {
-    exportBtn.title = "Subscribe to unlock your personalized action plan";
   }
-})();
+  if (localStorage.getItem("ml_ok")==="1") unlock();
 
+  // Fallback: some ML embeds post a success message
+  window.addEventListener("message", function(ev){
+    try{
+      var d = ev.data;
+      if (typeof d === "string" && d.indexOf("ml:form:success") !== -1) {
+        localStorage.setItem("ml_ok","1");
+        unlock();
+      } else if (d && d.type === "ml:form:success") {
+        localStorage.setItem("ml_ok","1");
+        unlock();
+      }
+    }catch(e){}
+  }, false);
+})();
+</script>
+
+<script>
 /* ---------- Scoring ---------- */
 const PILLARS = {
   "Design": { label: "Design & Interop", max: 10 },
@@ -357,7 +377,7 @@ function renderChart(byPillar){
   if (chart){
     chart.data.labels = labels;
     chart.data.datasets[0].data = data;
-    chart.options.scales.r.suggestedMax = Math.max(...maxValues); /* fix: use suggestedMax */
+    chart.options.scales.r.suggestedMax = Math.max(...maxValues);
     chart.update();
     return;
   }
@@ -475,11 +495,30 @@ function exportWorksheet(){
 document.addEventListener("change", (e)=>{
   if (e.target.matches('input[type="radio"][data-pillar]')) updateScoreUI();
 });
-document.getElementById("recalcBtn").addEventListener("click", updateScoreUI);
+document.getElementById("recalcBtn").addEventListener("click", updateScoreUI());
 document.getElementById("exportBtn").addEventListener("click", exportWorksheet);
 
 /* Initial render */
 updateScoreUI();
+</script>
+
+<script>
+/* Persist answers so the form doesn’t reset */
+document.addEventListener("change", e=>{
+  if(e.target.matches('input[type="radio"][data-pillar]')){
+    const answers={};
+    document.querySelectorAll('input[type="radio"][data-pillar]:checked').forEach(i=>answers[i.name]=i.value);
+    localStorage.setItem("answers",JSON.stringify(answers));
+  }
+});
+window.addEventListener("DOMContentLoaded",()=>{
+  const saved=JSON.parse(localStorage.getItem("answers")||"{}");
+  Object.entries(saved).forEach(([k,v])=>{
+    const el=document.querySelector(`input[name="${k}"][value="${v}"]`);
+    if(el) el.checked=true;
+  });
+  updateScoreUI();
+});
 </script>
 </body>
 </html>
