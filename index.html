@@ -18,13 +18,21 @@
 <!-- Optional: if ML does call this, we unlock too -->
 <script>
   function ml_webform_success_31574996(){
-    try {
-      localStorage.setItem('ml_ok','1');
-      if (window.unlockExport) window.unlockExport();
-    } catch(e){}
+    try { localStorage.setItem('ml_ok','1'); } catch(e){}
+    unlockExport();
     return false;
   }
 </script>
+<script>
+  function unlockExport(){
+    const btn = document.getElementById('exportBtn');
+    if (!btn) return;
+    btn.removeAttribute('disabled');
+    btn.title = 'Download your personalized action plan (.pdf)';
+    try { localStorage.setItem('ml_ok','1'); } catch(e){}
+  }
+</script>
+
 
 <style>
   :root{
@@ -254,43 +262,28 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 
 <script>
-/* Unlock helpers + listeners */
 (function(){
-  var exportBtn = document.getElementById("exportBtn");
-  function unlock(){
-    if(!exportBtn) return;
-    exportBtn.removeAttribute("disabled");
-    exportBtn.title = "Download your personalized action plan (.pdf)";
-  }
-  window.unlockExport = unlock;               // expose for other callbacks
-  if (localStorage.getItem("ml_ok")==="1") unlock();
+  const btn = document.getElementById('exportBtn');
 
-  // Some ML variants postMessage on success
-  window.addEventListener("message", function(ev){
-    try{
-      var d = ev.data;
-      if ((typeof d === "string" && d.indexOf("ml:form:success") !== -1) ||
-          (d && d.type === "ml:form:success")) {
-        localStorage.setItem("ml_ok","1");
-        unlock();
-      }
-    }catch(e){}
-  }, false);
+  // make available for ML callback
+  window.unlockExport = function(){
+    if (!btn) return;
+    btn.disabled = false;
+    btn.title = 'Download your personalized action plan (.pdf)';
+    try { localStorage.setItem('ml_ok','1'); } catch(e){}
+  };
 
-  // Robust path: watch injected DOM for success body becoming visible
-  var host = document.getElementById('subscribe');
-  if (host) {
-    var mo = new MutationObserver(function(){
-      var okPane = host.querySelector('.ml-form-successBody');
-      if (okPane && getComputedStyle(okPane).display !== 'none') {
-        localStorage.setItem("ml_ok","1");
-        unlock();
-      }
-    });
-    mo.observe(host, {subtree:true, attributes:true, childList:true, attributeFilter:['style','class']});
+  // initial gate
+  if (localStorage.getItem('ml_ok') === '1') {
+    unlockExport();
+  } else {
+    btn.disabled = true;
+    btn.title = 'Subscribe to unlock your personalized action plan';
   }
 })();
 </script>
+
+
 
 <script>
 /* ---------- Scoring ---------- */
@@ -451,41 +444,44 @@ function getPriorityAdvice(byPillar) {
   return advice[lowestPillar] || ["Review all pillars to identify specific areas for improvement."];
 }
 
+
 function exportWorksheet(){
+  const { jsPDF } = window.jspdf;
   const { score, bucket, pct, byPillar, tcoMultiplier } = updateScoreUI();
-
-  const lines = [];
-  lines.push("Flicktronix AV Readiness — Executive Action Plan");
-  lines.push("================================================");
-  lines.push("");
-  lines.push(`Overall Readiness: ${pct}%  |  Tier: ${bucket}  |  Estimated TCO Multiplier: ${tcoMultiplier}×`);
-  lines.push("");
-  lines.push("--- Pillar Breakdown ---");
-  PILLAR_KEYS.forEach(key => {
-    const pScore = byPillar[key] || 0;
-    const pMax = PILLARS[key].max;
-    const pPct = pMax > 0 ? Math.round((pScore / pMax) * 100) : 0;
-    lines.push(`- ${PILLARS[key].label}: ${pPct}% (${pScore} / ${pMax})`);
+  const doc = new jsPDF({ unit:"pt", format:"a4" });
+  let y = 60;
+  doc.setFont("helvetica","bold").setFontSize(14).text("Flicktronix AV Readiness — Executive Action Plan",40,y);
+  y+=20;
+  doc.setFont("helvetica","normal").setFontSize(11);
+  doc.text(`Overall Readiness: ${pct}%`,40,y+=14);
+  doc.text(`Tier: ${bucket}`,40,y+=14);
+  doc.text(`Estimated TCO Multiplier: ${tcoMultiplier.toFixed(2)}×`,40,y+=14);
+  y+=16;
+  doc.setFont("helvetica","bold").text("Pillar Breakdown",40,y+=14);
+  doc.setFont("helvetica","normal");
+  PILLAR_KEYS.forEach(k=>{
+    const s=byPillar[k]||0,m=PILLARS[k].max,p=m>0?Math.round((s/m)*100):0;
+    doc.text(`• ${PILLARS[k].label}: ${p}% (${s}/${m})`,40,y+=14);
   });
-  lines.push("");
-  lines.push("--- Recommended Next Steps ---");
-  getPriorityAdvice(byPillar).forEach(line => lines.push(line));
-  lines.push("");
-  lines.push("--- 20-Minute Readout ---");
-  lines.push("We’ll validate assumptions and map a 3-week stabilization plan (guardrails + quick wins).");
-  lines.push(">>> [https://calendar.app.google/2pHsE1fCpm3SWjzn6]");
-  lines.push("");
-
-  const blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "Flicktronix_AV_Action_Plan.pdf";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  y+=20;
+  doc.setFont("helvetica","bold").text("Recommended Next Steps",40,y);
+  doc.setFont("helvetica","normal");
+  getPriorityAdvice(byPillar).forEach(line=>{
+    const t=doc.splitTextToSize(line,500);
+    doc.text(t,40,y+=14);
+    y+=t.length*12;
+  });
+  y+=20;
+  doc.setFont("helvetica","bold").text("20-Minute Readout",40,y+=14);
+  doc.setFont("helvetica","normal");
+  const lines=[
+    "We’ll validate assumptions and map a 3-week stabilization plan (guardrails + quick wins).",
+    "Visit flicktronix.com to schedule your enterprise AV audit."
+  ];
+  lines.forEach(l=>{const t=doc.splitTextToSize(l,500);doc.text(t,40,y+=14);y+=t.length*12;});
+  doc.save("Flicktronix_AV_Action_Plan.pdf");
 }
+
 
 /* ---------- Wire-up ---------- */
 document.addEventListener("change", (e)=>{
@@ -497,6 +493,7 @@ document.getElementById("exportBtn").addEventListener("click", exportWorksheet);
 /* Initial render */
 updateScoreUI();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <script>
 /* Persist answers so the form doesn’t reset */
