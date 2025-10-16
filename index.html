@@ -496,6 +496,35 @@ updateScoreUI();
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <script>
+// Recalculate: persist answers, recompute, flash KPI, scroll to score
+const recalcBtn = document.getElementById('recalcBtn');
+
+recalcBtn.addEventListener('click', () => {
+  // Persist current selections
+  const answers = {};
+  document
+    .querySelectorAll('input[type="radio"][data-pillar]:checked')
+    .forEach(i => { answers[i.name] = i.value; });
+  try { localStorage.setItem('answers', JSON.stringify(answers)); } catch(e){}
+
+  // Recompute + update UI
+  const s = updateScoreUI();
+
+  // Visual feedback on KPI block
+  const kpi = document.querySelector('.kpi');
+  if (kpi) {
+    kpi.style.boxShadow = '0 0 0 3px rgba(11,95,255,.25)';
+    setTimeout(() => { kpi.style.boxShadow = ''; }, 300);
+  }
+
+  // Bring the score into view
+  kpi?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+</script>
+
+
+
+<script>
 /* Persist answers so the form doesn’t reset */
 document.addEventListener("change", e=>{
   if(e.target.matches('input[type="radio"][data-pillar]')){
