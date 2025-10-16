@@ -476,7 +476,7 @@ function exportWorksheet(){
   doc.setFont("helvetica","normal");
   const lines=[
     "We’ll validate assumptions and map a 3-week stabilization plan (guardrails + quick wins).",
-    "Visit flicktronix.com to schedule your enterprise AV audit."
+    "Go to https://calendar.app.google/2pHsE1fCpm3SWjzn6 to schedule your enterprise AV audit."
   ];
   lines.forEach(l=>{const t=doc.splitTextToSize(l,500);doc.text(t,40,y+=14);y+=t.length*12;});
   doc.save("Flicktronix_AV_Action_Plan.pdf");
