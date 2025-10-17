@@ -15,34 +15,15 @@
   ml('account','1191636');
 </script>
 
-<!-- Unlock on ML success (and persist) -->
-<script>
-  function ml_webform_success_31574996(){
-    try { localStorage.setItem('ml_ok','1'); } catch(e){}
-    unlockExport();
-    return false;
-  }
-  function unlockExport(){
-    const btn = document.getElementById('exportBtn');
-    if (!btn) return;
-    btn.disabled = false;
-    btn.title = 'Download your personalized action plan (.pdf)';
-    try { localStorage.setItem('ml_ok','1'); } catch(e){}
-  }
-</script>
-
 <style>
-  /* === THEME OVERRIDES === */
 /* === THEME OVERRIDES === */
 :root{
-  --bg:#091217;              /* base background */
-  --ink:#E6ECF2;             /* main text on dark bg */
-  --muted:#A7B2C2;           /* muted text */
-  --panel:#111C2A;           /* card/field background */
-  --line:#223147;            /* borders/dividers */
-  --accent:#0B5FFF;          /* keep your primary accent */
-  --accent-ink:#ffffff;
-  --accent:#E05534;              /* brand orange for actions/radios */
+  --bg:#091217;
+  --ink:#E6ECF2;
+  --muted:#A7B2C2;
+  --panel:#111C2A;
+  --line:#223147;
+  --accent:#E05534;     /* brand orange for actions/radios */
   --accent-ink:#091217;
 }
 
@@ -56,56 +37,32 @@ html, body { background:#091217; color:var(--ink); }
 fieldset.audit-grid { background:#0D1724; border-color:var(--line); }
 fieldset.audit-grid .qrow .opts label { background:#0F1B2A; border-color:var(--line); }
 
-/* alt button (your secondary / link-style button) */
+/* alt button */
 .link-btn{
   background:#E05534;
-  color:#091217;              /* dark text on orange */
+  color:#091217;
   border:1px solid #E05534;
 }
 
-/* subtle tweaks for badges/pills on dark */
+/* badges/pills on dark */
 .kpi .pill{ background:#0F1B2A; border-color:var(--line); color:var(--ink); }
-.bucket.warn{ color:#091217; } /* ensure contrast on yellow */
-
-/* --- Fix contrast for KPI pills, headings, and option labels --- */
-#scoreCard .kpi .pill{
-  background:#0F1B2A;       /* darker pill on dark card */
-  border-color:#223147;
-  color:#FAFAFA;
-}
-#scoreCard .kpi .pill .muted{ color:#A7B2C2; }  /* small captions in pills */
-#scoreCard .score-lg{ color:#FAFAFA; }          /* big numbers */
-#scoreCard h2{ color:#FAFAFA; }
-
-.opts label{ color:var(--ink); }                 /* ensure radio label text visible */
-
-/* Bucket badges stay readable on dark */
 .bucket.good{ background:#1a7f37; color:#ffffff; }
 .bucket.warn{ background:#ffb100; color:#091217; }
 .bucket.risk{ background:#c62828; color:#ffffff; }
+#scoreCard .kpi .pill{ background:#0F1B2A; border-color:#223147; color:#FAFAFA; }
+#scoreCard .kpi .pill .muted{ color:#A7B2C2; }
+#scoreCard .score-lg{ color:#FAFAFA; }
+#scoreCard h2{ color:#FAFAFA; }
 
-/* Dividers a hair brighter on dark */
 .hr{ background:#2C3A52; }
 
-/* --- Fix contrast for question rows on dark theme --- */
-
-/* Card surface + borders */
-.card{
-  background:#0F1B2A;           /* dark panel */
-  border-color:#223147;
-}
-
-/* Section titles */
+/* Section titles + questions */
 legend{ color:#FAFAFA; }
-
-/* Question titles + hints */
 .qrow strong{ color:#FAFAFA; }
-.hint{ color:#B6C2D1; }         /* softer but readable */
-
-/* Dashed separator */
+.hint{ color:#B6C2D1; }
 .qrow{ border-bottom:1px dashed #2C3A52; }
 
-/* Choice buttons (right side) */
+/* radio choices */
 .opts{
   display:grid;
   grid-template-columns:repeat(3,minmax(120px,1fr));
@@ -113,32 +70,47 @@ legend{ color:#FAFAFA; }
   align-items:stretch;
 }
 .opts label{
-  color:#FAFAFA;                 /* readable text */
-  background:#142236;            /* slightly lighter than card */
+  color:#FAFAFA;
+  background:#142236;
   border:1px solid #2C3A52;
   min-height:44px;
   justify-content:center;
   text-align:center;
 }
-
 input[type="radio"]{ accent-color:var(--accent); }
 .opts label:hover{ border-color:#3A4E6B; }
-.opts label:focus-within{
-  outline:2px solid var(--accent);
-  outline-offset:2px;
-}
+.opts label:focus-within{ outline:2px solid var(--accent); outline-offset:2px; }
 
-/* Headings inside cards */
-.card h2{ color:#FAFAFA; }
+/* base layout */
+*{box-sizing:border-box}
+a{color:var(--accent);text-decoration:none}
+a:focus{outline:2px solid var(--accent)}
+.wrap{max-width:1100px;margin-inline:auto;padding:32px 20px}
+header{display:grid;gap:8px;margin-bottom:20px}
+h1{font-size:34px;line-height:1.2;margin:0 0 2px}
+.sub{color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card h2{font-size:20px;margin:0 0 12px}
+.muted{color:var(--muted)}
+.kpi{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:6px 0 0}
+.kpi .pill{background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:12px;min-width:120px;text-align:center}
+.score-lg{font-size:44px;font-weight:700}
+.bucket{font-weight:700;padding:6px 10px;border-radius:10px;display:inline-block}
+legend{padding:0 6px;font-weight:bold;font-size:1.1em;}
+.hint{font-size:13px;color:var(--muted)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+button{appearance:none;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);padding:12px 14px;font-weight:600;cursor:pointer}
+button[disabled]{opacity:.55;cursor:not-allowed}
+.link-btn{background:#E05534;color:#091217;border:1px solid #E05534}
+.foot{margin-top:18px;font-size:13px;color:var(--muted)}
+.hr{height:1px;background:var(--line);margin:20px 0}
+.notice{background:#fff8e1;border:1px solid #ffe5a7;border-radius:12px;padding:10px 12px;color:#091217}
+.ml-embedded{isolation:isolate}
+.chart-container{position:relative;height:250px;width:100%}
 
-/* Optional: make small captions on KPI tiles easier to read */
-#scoreCard .kpi .pill .muted{ color:#A7B2C2; }
-
-
-
-
-  /* ===== 4-col audit grid: Question | Opt1 | Opt2 | Opt3 ===== */
-  fieldset.audit-grid{
+/* ===== 4-col audit grid: Question | Opt1 | Opt2 | Opt3 ===== */
+fieldset.audit-grid{
   display:grid;
   grid-template-columns: 1fr repeat(3, minmax(160px, 1fr));
   column-gap:12px;
@@ -146,83 +118,43 @@ input[type="radio"]{ accent-color:var(--accent); }
   border:1px solid var(--line);
   padding:14px;
   border-radius:12px;
-  background:var(--panel);            /* matches dark theme */
+  background:var(--panel);
   margin:0;
 }
+fieldset.audit-grid .qrow{ display: contents; }
+fieldset.audit-grid .qrow > div:first-child{ grid-column: 1; }
+fieldset.audit-grid .qrow .opts{ display: contents; }
+fieldset.audit-grid .qrow .opts label{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  background:var(--panel);
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  cursor:pointer;
+  min-height:44px;
+  width:100%;
+  text-align:center;
+  white-space:nowrap;
+}
+fieldset.audit-grid .qrow + .qrow::before{
+  content:"";
+  grid-column: 1 / -1;
+  height:1px;
+  background: repeating-linear-gradient(to right, var(--line), var(--line) 6px, transparent 6px, transparent 12px);
+  margin:6px 0;
+  display:block;
+}
 
-  /* each question row uses the fieldset's grid cells */
-  fieldset.audit-grid .qrow{ display: contents; }
-  fieldset.audit-grid .qrow > div:first-child{ grid-column: 1; }
-  /* options occupy columns 2..4 consistently on every row */
-  fieldset.audit-grid .qrow .opts{ display: contents; }
-  fieldset.audit-grid .qrow .opts label{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    background:var(--panel);
-    padding:10px 12px;
-    border:1px solid var(--line);
-    border-radius:8px;
-    cursor:pointer;
-    min-height:44px;
-    width:100%;
-    text-align:center;
-    white-space:nowrap;
-  }
-  /* dashed divider between logical rows */
-  fieldset.audit-grid .qrow + .qrow::before{
-    content:"";
-    grid-column: 1 / -1;
-    height:1px;
-    background: repeating-linear-gradient(to right, var(--line), var(--line) 6px, transparent 6px, transparent 12px);
-    margin:6px 0;
-    display:block;
-  }
-
-  /* Responsive: stack options under the question on small screens */
-  @media (max-width: 800px){
-    fieldset.audit-grid{
-      grid-template-columns: 1fr;
-    }
-    fieldset.audit-grid .qrow .opts{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; }
-    fieldset.audit-grid .qrow{ display:contents; } /* keeps Q | A | A | A in one line */
-    fieldset.audit-grid .qrow + .qrow::before{ margin:12px 0; }
-  }
-
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}
-  a{color:var(--accent);text-decoration:none}
-  a:focus{outline:2px solid var(--accent)}
-  .wrap{max-width:1100px;margin-inline:auto;padding:32px 20px}
-  header{display:grid;gap:8px;margin-bottom:20px}
-  h1{font-size:34px;line-height:1.2;margin:0 0 2px}
-  .sub{color:var(--muted)}
-  /* Full-width stack: no side column */
-  .stack{display:flex;flex-direction:column;gap:20px}
-
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
-  .card h2{font-size:20px;margin:0 0 12px}
-  .muted{color:var(--muted)}
-  .kpi{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:6px 0 0}
-  .kpi .pill{background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:12px;min-width:120px;text-align:center}
-  .score-lg{font-size:44px;font-weight:700}
-  .bucket{font-weight:700;padding:6px 10px;border-radius:10px;display:inline-block}
-  .bucket.good{background:var(--good);color:#fff}
-  .bucket.warn{background:var(--warn);color:#111}
-  .bucket.risk{background:var(--risk);color:#fff}
-  legend{padding:0 6px;font-weight:bold;font-size:1.1em;}
-  .hint{font-size:13px;color:var(--muted)}
-  .actions{display:flex;gap:10px;flex-wrap:wrap}
-  button{appearance:none;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);padding:12px 14px;font-weight:600;cursor:pointer}
-  button[disabled]{opacity:.55;cursor:not-allowed}
-  .link-btn{background:#fff;color:var(--accent);border:1px solid var(--line)}
-  .foot{margin-top:18px;font-size:13px;color:var(--muted)}
-  .hr{height:1px;background:var(--line);margin:20px 0}
-  .notice{background:#fff8e1;border:1px solid #ffe5a7;border-radius:12px;padding:10px 12px}
-  .ml-embedded{isolation:isolate}
-  .chart-container{position:relative;height:250px;width:100%}
-  input[type="radio"]{accent-color:var(--accent)}
+/* Responsive */
+@media (max-width: 800px){
+  fieldset.audit-grid{ grid-template-columns: 1fr; }
+  fieldset.audit-grid .qrow .opts{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; }
+  fieldset.audit-grid .qrow{ display:contents; }
+  fieldset.audit-grid .qrow + .qrow::before{ margin:12px 0; }
+}
 </style>
 </head>
 
@@ -432,7 +364,7 @@ input[type="radio"]{ accent-color:var(--accent); }
       </fieldset>
     </div>
 
-    <!-- SCORE (full width, after pillars) -->
+    <!-- SCORE -->
     <div class="card" id="scoreCard" aria-live="polite" aria-atomic="true">
       <h2>Your Readiness Score</h2>
       <div class="kpi">
@@ -447,8 +379,13 @@ input[type="radio"]{ accent-color:var(--accent); }
         <canvas id="scoreChart" role="img" aria-label="Readiness breakdown by pillar"></canvas>
       </div>
 
+      <div class="hr"></div>
+      <div id="pillarScores"></div>
+      <div class="hr"></div>
+      <div class="notice">Get your personalized action plan by subscribing below.</div>
+    </div>
 
-    <!-- SUBSCRIBE (full width, immediately after score) -->
+    <!-- SUBSCRIBE -->
     <div class="card" id="subscribe">
       <h2>Unlock Your Action Plan</h2>
       <div class="ml-embedded" data-form="2yvzIn"></div>
@@ -477,23 +414,45 @@ input[type="radio"]{ accent-color:var(--accent); }
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
+<!-- Unified unlock + guarded click -->
 <script>
-/* ---------- Gate Export on load ---------- */
-(function(){
+// Single unlock used by ML + load
+function unlockExport(){
   const btn = document.getElementById('exportBtn');
-  window.unlockExport = function(){
-    if (!btn) return;
-    btn.disabled = false;
-    btn.title = 'Download your personalized action plan (.pdf)';
-    try { localStorage.setItem('ml_ok','1'); } catch(e){}
-  };
-  if (localStorage.getItem('ml_ok') === '1') {
-    unlockExport();
-  } else {
+  if (!btn) return;
+  btn.disabled = false;
+  btn.title = 'Download your personalized action plan (.pdf)';
+  try { localStorage.setItem('ml_ok','1'); } catch(e){}
+}
+
+// MailerLite callback (must be global with this exact name)
+function ml_webform_success_31574996(){
+  try { localStorage.setItem('ml_ok','1'); } catch(e){}
+  unlockExport();
+  return false;
+}
+
+// Init: honor gate; add dev override ?unlock=1; bind guarded click
+document.addEventListener('DOMContentLoaded', ()=>{
+  const btn = document.getElementById('exportBtn');
+  if (!btn) return;
+
+  const dev = new URL(location.href).searchParams.get('unlock') === '1';
+  const ok = dev || localStorage.getItem('ml_ok') === '1';
+  if (ok) unlockExport();
+  else {
     btn.disabled = true;
     btn.title = 'Subscribe to unlock your personalized action plan';
   }
-})();
+
+  btn.addEventListener('click', ()=>{
+    if (btn.disabled) return;
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      alert('PDF engine did not load. Refresh the page.'); return;
+    }
+    exportWorksheet();
+  });
+});
 </script>
 
 <script>
@@ -589,38 +548,37 @@ function renderChart(byPillar){
   }
 
   chart = new Chart(ctx, {
-  type: 'radar',
-  data: {
-    labels,
-    datasets: [{
-      label: 'Pillar Score',
-      data,
-      fill: true,
-      backgroundColor: 'rgba(224, 85, 52, 0.25)', // #E05534 @ 25%
-      borderColor: '#E05534',
-      pointBackgroundColor: '#E05534',
-      pointBorderColor: '#FAFAFA',
-      pointHoverBackgroundColor: '#FAFAFA',
-      pointHoverBorderColor: '#E05534'
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      r: {
-        suggestedMin: 0,
-        suggestedMax: Math.max(...maxValues),
-        ticks: { stepSize: 2, color: '#A7B2C2' },
-        grid: { color: '#2C3A52' },
-        angleLines: { color: '#2C3A52' },
-        pointLabels: { color: '#A7B2C2' }
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Pillar Score',
+        data,
+        fill: true,
+        backgroundColor: 'rgba(224, 85, 52, 0.25)',
+        borderColor: '#E05534',
+        pointBackgroundColor: '#E05534',
+        pointBorderColor: '#FAFAFA',
+        pointHoverBackgroundColor: '#FAFAFA',
+        pointHoverBorderColor: '#E05534'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          suggestedMin: 0,
+          suggestedMax: Math.max(...maxValues),
+          ticks: { stepSize: 2, color: '#A7B2C2' },
+          grid: { color: '#2C3A52' },
+          angleLines: { color: '#2C3A52' },
+          pointLabels: { color: '#A7B2C2' }
+        }
       }
     }
-  }
-});
-
+  });
 }
 
 /* ---------- Advice + PDF ---------- */
@@ -680,6 +638,9 @@ function getPriorityAdvice(byPillar) {
 }
 
 function exportWorksheet(){
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('PDF engine did not load. Refresh the page.'); return;
+  }
   const { jsPDF } = window.jspdf;
   const { bucket, pct, byPillar, tcoMultiplier } = updateScoreUI();
   const doc = new jsPDF({ unit:"pt", format:"a4" });
@@ -718,7 +679,7 @@ function exportWorksheet(){
 </script>
 
 <script>
-/* Wire-up */
+/* Wire-up (no exportBtn click here—handled in unified block) */
 document.addEventListener("change", (e)=>{
   if (e.target.matches('input[type="radio"][data-pillar]')) updateScoreUI();
 });
@@ -734,7 +695,6 @@ document.getElementById("recalcBtn").addEventListener("click", ()=>{
     kpi.scrollIntoView({behavior:'smooth',block:'center'});
   }
 });
-document.getElementById("exportBtn").addEventListener("click", exportWorksheet);
 
 /* Persist answers across reload */
 document.addEventListener("change", e=>{
