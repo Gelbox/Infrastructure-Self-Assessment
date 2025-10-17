@@ -1,11 +1,20 @@
 <!doctype html>
 <html lang="en">
 <head>
-<link rel="preconnect" href="https://assets.mailerlite.com" crossorigin>
 <meta charset="utf-8" />
 <meta http-equiv="x-ua-compatible" content="ie=edge" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>AV Solution 5-Pillar Readiness Scorecard</title>
+
+<!-- 0) Decide gate result ASAP (before anything renders) -->
+<script>
+(function(){
+  const params = new URL(location.href).searchParams;
+  const devUnlock = params.get('unlock') === '1';
+  const ok = devUnlock || localStorage.getItem('ml_ok') === '1';
+  if (ok) document.documentElement.classList.add('gate-ok');
+})();
+</script>
 
 <!-- MailerLite Universal (required for JS embed) -->
 <script>
@@ -16,447 +25,381 @@
 </script>
 
 <style>
-/* === THEME OVERRIDES === */
+/* === THEME (dark) === */
 :root{
   --bg:#091217;
   --ink:#E6ECF2;
   --muted:#A7B2C2;
   --panel:#111C2A;
   --line:#223147;
-  --accent:#E05534;     /* brand orange for actions/radios */
-  --accent-ink:#091217;
+  --accent:#E05534;       /* brand orange for actions/radios */
+  --accent-ink:#091217;   /* dark text on orange */
+  --good:#1a7f37; --warn:#ffb100; --risk:#c62828; --radius:16px;
 }
-
-/* headings + links */
-h1, h2, h3 { color:#FAFAFA; }
-a, a:visited { color:#FAFAFA; }
-
-/* body + cards adapt to dark base */
-html, body { background:#091217; color:var(--ink); }
-.card { background:var(--panel); border-color:var(--line); }
-fieldset.audit-grid { background:#0D1724; border-color:var(--line); }
-fieldset.audit-grid .qrow .opts label { background:#0F1B2A; border-color:var(--line); }
-
-/* alt button */
-.link-btn{
-  background:#E05534;
-  color:#091217;
-  border:1px solid #E05534;
-}
-
-/* badges/pills on dark */
-.kpi .pill{ background:#0F1B2A; border-color:var(--line); color:var(--ink); }
-.bucket.good{ background:#1a7f37; color:#ffffff; }
-.bucket.warn{ background:#ffb100; color:#091217; }
-.bucket.risk{ background:#c62828; color:#ffffff; }
-#scoreCard .kpi .pill{ background:#0F1B2A; border-color:#223147; color:#FAFAFA; }
-#scoreCard .kpi .pill .muted{ color:#A7B2C2; }
-#scoreCard .score-lg{ color:#FAFAFA; }
-#scoreCard h2{ color:#FAFAFA; }
-
-.hr{ background:#2C3A52; }
-
-/* Section titles + questions */
-legend{ color:#FAFAFA; }
-.qrow strong{ color:#FAFAFA; }
-.hint{ color:#B6C2D1; }
-.qrow{ border-bottom:1px dashed #2C3A52; }
-
-/* radio choices */
-.opts{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(120px,1fr));
-  gap:8px;
-  align-items:stretch;
-}
-.opts label{
-  color:#FAFAFA;
-  background:#142236;
-  border:1px solid #2C3A52;
-  min-height:44px;
-  justify-content:center;
-  text-align:center;
-}
-input[type="radio"]{ accent-color:var(--accent); }
-.opts label:hover{ border-color:#3A4E6B; }
-.opts label:focus-within{ outline:2px solid var(--accent); outline-offset:2px; }
-
-/* base layout */
 *{box-sizing:border-box}
-a{color:var(--accent);text-decoration:none}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans"}
+h1,h2,h3{color:#FAFAFA;margin:0 0 8px}
+a,a:visited{color:#FAFAFA;text-decoration:none}
 a:focus{outline:2px solid var(--accent)}
-.wrap{max-width:1100px;margin-inline:auto;padding:32px 20px}
-header{display:grid;gap:8px;margin-bottom:20px}
-h1{font-size:34px;line-height:1.2;margin:0 0 2px}
+.wrap{max-width:1100px;margin-inline:auto;padding:28px 20px}
 .sub{color:var(--muted)}
-.stack{display:flex;flex-direction:column;gap:20px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-.card h2{font-size:20px;margin:0 0 12px}
+.card{background:#0F1B2A;border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.card h2{font-size:20px;margin:0 0 10px}
 .muted{color:var(--muted)}
+.hr{height:1px;background:#2C3A52;margin:20px 0}
+.notice{background:#0D1724;border:1px solid #2C3A52;border-radius:12px;padding:10px 12px;color:#E6ECF2}
 .kpi{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:6px 0 0}
-.kpi .pill{background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:12px;min-width:120px;text-align:center}
+.kpi .pill{background:#0F1B2A;border:1px solid var(--line);padding:8px 12px;border-radius:12px;min-width:120px;text-align:center;color:#FAFAFA}
 .score-lg{font-size:44px;font-weight:700}
 .bucket{font-weight:700;padding:6px 10px;border-radius:10px;display:inline-block}
-legend{padding:0 6px;font-weight:bold;font-size:1.1em;}
-.hint{font-size:13px;color:var(--muted)}
+.bucket.good{background:var(--good);color:#fff}
+.bucket.warn{background:var(--warn);color:#091217}
+.bucket.risk{background:var(--risk);color:#fff}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
 button{appearance:none;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);padding:12px 14px;font-weight:600;cursor:pointer}
 button[disabled]{opacity:.55;cursor:not-allowed}
-.link-btn{background:#E05534;color:#091217;border:1px solid #E05534}
-.foot{margin-top:18px;font-size:13px;color:var(--muted)}
-.hr{height:1px;background:var(--line);margin:20px 0}
-.notice{background:#fff8e1;border:1px solid #ffe5a7;border-radius:12px;padding:10px 12px;color:#091217}
-.ml-embedded{isolation:isolate}
+.link-btn{background:var(--accent);color:var(--accent-ink);border:1px solid var(--accent)}
+.legend-note{font-size:13px;color:var(--muted)}
 .chart-container{position:relative;height:250px;width:100%}
+legend{padding:0 6px;font-weight:bold;font-size:1.1em;color:#FAFAFA}
 
-/* ===== 4-col audit grid: Question | Opt1 | Opt2 | Opt3 ===== */
+/* Audit grid: Question | Opt1 | Opt2 | Opt3 */
 fieldset.audit-grid{
   display:grid;
   grid-template-columns: 1fr repeat(3, minmax(160px, 1fr));
-  column-gap:12px;
-  row-gap:12px;
+  column-gap:12px; row-gap:12px;
   border:1px solid var(--line);
-  padding:14px;
-  border-radius:12px;
-  background:var(--panel);
-  margin:0;
+  padding:14px;border-radius:12px;background:#111C2A;margin:0;
 }
 fieldset.audit-grid .qrow{ display: contents; }
-fieldset.audit-grid .qrow > div:first-child{ grid-column: 1; }
+fieldset.audit-grid .qrow > div:first-child{ grid-column:1; }
 fieldset.audit-grid .qrow .opts{ display: contents; }
 fieldset.audit-grid .qrow .opts label{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  background:var(--panel);
-  padding:10px 12px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  cursor:pointer;
-  min-height:44px;
-  width:100%;
-  text-align:center;
-  white-space:nowrap;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  background:#142236;border:1px solid #2C3A52;border-radius:8px;
+  min-height:44px;width:100%;text-align:center;white-space:nowrap;color:#FAFAFA;cursor:pointer;
 }
-fieldset.audit-grid .qrow + .qrow::before{
-  content:"";
-  grid-column: 1 / -1;
-  height:1px;
-  background: repeating-linear-gradient(to right, var(--line), var(--line) 6px, transparent 6px, transparent 12px);
-  margin:6px 0;
-  display:block;
-}
+.qrow{ border-bottom:1px dashed #2C3A52; }
+.qrow:last-child{ border-bottom:0; }
+input[type="radio"]{ accent-color:var(--accent); }
+.opts label:hover{ border-color:#3A4E6B; }
+.opts label:focus-within{ outline:2px solid var(--accent); outline-offset:2px; }
+.hint{font-size:13px;color:#B6C2D1}
+.stack{display:flex;flex-direction:column;gap:20px}
+
+/* Gate vs App containers */
+#gate{display:block}
+#app{display:none}
+.gate-ok #gate{display:none}
+.gate-ok #app{display:block}
+
+/* Footer */
+.foot{margin-top:18px;font-size:13px;color:var(--muted)}
 
 /* Responsive */
-@media (max-width: 800px){
-  fieldset.audit-grid{ grid-template-columns: 1fr; }
-  fieldset.audit-grid .qrow .opts{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; }
-  fieldset.audit-grid .qrow{ display:contents; }
-  fieldset.audit-grid .qrow + .qrow::before{ margin:12px 0; }
+@media (max-width:800px){
+  fieldset.audit-grid{ grid-template-columns:1fr; }
+  fieldset.audit-grid .qrow .opts{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
 }
 </style>
 </head>
 
 <body>
-<div class="wrap" id="top">
-  <header>
-    <h1>AV Solution 5-Pillar Readiness Scorecard</h1>
-    <p class="sub">Assess your AV-over-IP strategy across five planes: Design/Media, Security, Operations, Control/Clocking, and Management.</p>
-  </header>
+<div class="wrap">
 
-  <div class="stack">
+  <!-- 1) GATE SCREEN (shows until unlocked) -->
+  <div id="gate" class="card" aria-live="polite" aria-atomic="true">
+    <h2>Unlock Your Action Plan</h2>
+    <p class="sub">Subscribe to unlock the scorecard and export your personalized PDF.</p>
+    <div class="ml-embedded" data-form="2yvzIn"></div>
+    <noscript>This form requires JavaScript.</noscript>
+    <div class="hr"></div>
+    <p class="legend-note">Privacy: This assessment runs in your browser. We don’t collect your answers, and contact info is handled by MailerLite. <strong>Your information is never shared.</strong></p>
+  </div>
 
-    <!-- Pillar 1 -->
-    <div class="card">
-      <fieldset class="audit-grid">
-        <legend>Pillar 1: Design &amp; Interop (Media/Data)</legend>
+  <!-- 2) MAIN APP (hidden until unlocked) -->
+  <div id="app" aria-live="polite" aria-atomic="true">
+    <header style="margin-bottom:16px">
+      <h1>AV Solution 5-Pillar Readiness Scorecard</h1>
+      <p class="sub">Assess your AV-over-IP strategy across five planes: Design/Media, Security, Operations, Control/Clocking, and Management.</p>
+      <p class="legend-note">Privacy: This assessment runs in your browser. We don’t collect your answers, and contact info is handled by MailerLite. <strong>Your information is never shared.</strong></p>
+    </header>
 
-        <div class="qrow">
-          <div><strong>PTP Domain Design</strong><div class="hint">Dedicated domains, BMCA strategy, GM resilience</div></div>
-          <div class="opts" role="radiogroup" aria-label="PTP domain design">
-            <label><input type="radio" name="q1" value="0" data-pillar="Design">None</label>
-            <label><input type="radio" name="q1" value="1" data-pillar="Design">Partial</label>
-            <label><input type="radio" name="q1" value="2" data-pillar="Design">Documented</label>
+    <div class="stack">
+
+      <!-- Pillar 1 -->
+      <div class="card">
+        <fieldset class="audit-grid">
+          <legend>Pillar 1: Design &amp; Interop (Media/Data)</legend>
+
+          <div class="qrow">
+            <div><strong>PTP Domain Design</strong><div class="hint">Dedicated domains, BMCA strategy, GM resilience</div></div>
+            <div class="opts" role="radiogroup" aria-label="PTP domain design">
+              <label><input type="radio" name="q1" value="0" data-pillar="Design">None</label>
+              <label><input type="radio" name="q1" value="1" data-pillar="Design">Partial</label>
+              <label><input type="radio" name="q1" value="2" data-pillar="Design">Documented</label>
+            </div>
           </div>
-        </div>
 
-        <div class="qrow">
-          <div><strong>Grandmaster Redundancy</strong><div class="hint">Dual GM, holdover, failover tests</div></div>
-          <div class="opts" role="radiogroup" aria-label="Grandmaster redundancy">
-            <label><input type="radio" name="q2" value="0" data-pillar="Design">Single GM</label>
-            <label><input type="radio" name="q2" value="1" data-pillar="Design">Warm spare</label>
-            <label><input type="radio" name="q2" value="2" data-pillar="Design">Active failover</label>
+          <div class="qrow">
+            <div><strong>Grandmaster Redundancy</strong><div class="hint">Dual GM, holdover, failover tests</div></div>
+            <div class="opts" role="radiogroup" aria-label="Grandmaster redundancy">
+              <label><input type="radio" name="q2" value="0" data-pillar="Design">Single GM</label>
+              <label><input type="radio" name="q2" value="1" data-pillar="Design">Warm spare</label>
+              <label><input type="radio" name="q2" value="2" data-pillar="Design">Active failover</label>
+            </div>
           </div>
-        </div>
 
-        <div class="qrow">
-          <div><strong>Multicast Safety</strong><div class="hint">IGMPv3, PIM/SDM, RP/BSR, guardrails</div></div>
-          <div class="opts" role="radiogroup" aria-label="Multicast safety">
-            <label><input type="radio" name="q3" value="0" data-pillar="Design">Unmanaged</label>
-            <label><input type="radio" name="q3" value="1" data-pillar="Design">Basic IGMP</label>
-            <label><input type="radio" name="q3" value="2" data-pillar="Design">Engineered</label>
+          <div class="qrow">
+            <div><strong>Multicast Safety</strong><div class="hint">IGMPv3, PIM/SDM, RP/BSR, guardrails</div></div>
+            <div class="opts" role="radiogroup" aria-label="Multicast safety">
+              <label><input type="radio" name="q3" value="0" data-pillar="Design">Unmanaged</label>
+              <label><input type="radio" name="q3" value="1" data-pillar="Design">Basic IGMP</label>
+              <label><input type="radio" name="q3" value="2" data-pillar="Design">Engineered</label>
+            </div>
           </div>
-        </div>
 
-        <div class="qrow">
-          <div><strong>QoS &amp; Queues</strong><div class="hint">LLQ/priority, policing, WRED disabled where needed</div></div>
-          <div class="opts" role="radiogroup" aria-label="QoS">
-            <label><input type="radio" name="q4" value="0" data-pillar="Design">Best-effort</label>
-            <label><input type="radio" name="q4" value="1" data-pillar="Design">Partial</label>
-            <label><input type="radio" name="q4" value="2" data-pillar="Design">End-to-end</label>
+          <div class="qrow">
+            <div><strong>QoS &amp; Queues</strong><div class="hint">LLQ/priority, policing, WRED disabled where needed</div></div>
+            <div class="opts" role="radiogroup" aria-label="QoS">
+              <label><input type="radio" name="q4" value="0" data-pillar="Design">Best-effort</label>
+              <label><input type="radio" name="q4" value="1" data-pillar="Design">Partial</label>
+              <label><input type="radio" name="q4" value="2" data-pillar="Design">End-to-end</label>
+            </div>
           </div>
-        </div>
 
-        <div class="qrow">
-          <div><strong>Open Standards Adoption</strong><div class="hint">NMOS, AES67/ST 2110 interop validated</div></div>
-          <div class="opts" role="radiogroup" aria-label="Standards">
-            <label><input type="radio" name="q7" value="0" data-pillar="Design">None</label>
-            <label><input type="radio" name="q7" value="1" data-pillar="Design">Partial</label>
-            <label><input type="radio" name="q7" value="2" data-pillar="Design">Adopted</label>
+          <div class="qrow">
+            <div><strong>Open Standards Adoption</strong><div class="hint">NMOS, AES67/ST 2110 interop validated</div></div>
+            <div class="opts" role="radiogroup" aria-label="Standards">
+              <label><input type="radio" name="q7" value="0" data-pillar="Design">None</label>
+              <label><input type="radio" name="q7" value="1" data-pillar="Design">Partial</label>
+              <label><input type="radio" name="q7" value="2" data-pillar="Design">Adopted</label>
+            </div>
           </div>
-        </div>
-      </fieldset>
-    </div>
-
-    <!-- Pillar 2 -->
-    <div class="card">
-      <fieldset class="audit-grid">
-        <legend>Pillar 2: Security &amp; Policy</legend>
-
-        <div class="qrow">
-          <div><strong>Segmentation</strong><div class="hint">VRF/VLAN, ACLs, zero-trust policy</div></div>
-          <div class="opts" role="radiogroup" aria-label="Segmentation">
-            <label><input type="radio" name="q5" value="0" data-pillar="Security">Flat</label>
-            <label><input type="radio" name="q5" value="1" data-pillar="Security">Basic</label>
-            <label><input type="radio" name="q5" value="2" data-pillar="Security">Policy-driven</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Identity &amp; Access</strong><div class="hint">802.1X/MAB, device inventory, RBAC</div></div>
-          <div class="opts" role="radiogroup" aria-label="Identity">
-            <label><input type="radio" name="q6" value="0" data-pillar="Security">Ad-hoc</label>
-            <label><input type="radio" name="q6" value="1" data-pillar="Security">Partial</label>
-            <label><input type="radio" name="q6" value="2" data-pillar="Security">Managed</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Change Control</strong><div class="hint">CAB, windowing, rollback plan, audit trails</div></div>
-          <div class="opts" role="radiogroup" aria-label="Change">
-            <label><input type="radio" name="q12" value="0" data-pillar="Security">Informal</label>
-            <label><input type="radio" name="q12" value="1" data-pillar="Security">Partial</label>
-            <label><input type="radio" name="q12" value="2" data-pillar="Security">Disciplined</label>
-          </div>
-        </div>
-      </fieldset>
-    </div>
-
-    <!-- Pillar 3 -->
-    <div class="card">
-      <fieldset class="audit-grid">
-        <legend>Pillar 3: Operations &amp; Observability</legend>
-
-        <div class="qrow">
-          <div><strong>Routing &amp; API Orchestration</strong><div class="hint">Northbound APIs, repeatable provisioning</div></div>
-          <div class="opts" role="radiogroup" aria-label="Routing">
-            <label><input type="radio" name="q8" value="0" data-pillar="Operations">Manual</label>
-            <label><input type="radio" name="q8" value="1" data-pillar="Operations">Scripts</label>
-            <label><input type="radio" name="q8" value="2" data-pillar="Operations">Controller</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Observability & Telemetry</strong><div class="hint">Telemetry for PTP, multicast, QoS, device health</div></div>
-          <div class="opts" role="radiogroup" aria-label="Observability">
-            <label><input type="radio" name="q9" value="0" data-pillar="Operations">None</label>
-            <label><input type="radio" name="q9" value="1" data-pillar="Operations">Partial</label>
-            <label><input type="radio" name="q9" value="2" data-pillar="Operations">Dashboards + alerts</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Rollback &amp; Backups</strong><div class="hint">Golden configs, versioned restores, drills</div></div>
-          <div class="opts" role="radiogroup" aria-label="Rollback">
-            <label><input type="radio" name="q10" value="0" data-pillar="Operations">Ad-hoc</label>
-            <label><input type="radio" name="q10" value="1" data-pillar="Operations">Backups</label>
-            <label><input type="radio" name="q10" value="2" data-pillar="Operations">Tested DR</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Pre-Launch Validation</strong><div class="hint">Load/latency tests, failure injection</div></div>
-          <div class="opts" role="radiogroup" aria-label="Prelaunch">
-            <label><input type="radio" name="q11" value="0" data-pillar="Operations">None</label>
-            <label><input type="radio" name="q11" value="1" data-pillar="Operations">Basic</label>
-            <label><input type="radio" name="q11" value="2" data-pillar="Operations">Formal</label>
-          </div>
-        </div>
-      </fieldset>
-    </div>
-
-    <!-- Pillar 4 -->
-    <div class="card">
-      <fieldset class="audit-grid">
-        <legend>Pillar 4: Control &amp; Clocking</legend>
-
-        <div class="qrow">
-          <div><strong>PTP Profile &amp; Deployment</strong><div class="hint">IEEE 1588 profile (AES67/2110/802.1AS), HW timestamping, VLAN/TTL</div></div>
-          <div class="opts" role="radiogroup" aria-label="PTP profile">
-            <label><input type="radio" name="q13" value="0" data-pillar="Control">Unknown/mixed</label>
-            <label><input type="radio" name="q13" value="1" data-pillar="Control">Partially aligned</label>
-            <label><input type="radio" name="q13" value="2" data-pillar="Control">Correct profile + HW TS</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Grandmaster Stability (BMCA)</strong><div class="hint">Priority/clockClass set, GM failover tested, minimal flaps</div></div>
-          <div class="opts" role="radiogroup" aria-label="GM stability">
-            <label><input type="radio" name="q14" value="0" data-pillar="Control">Flaps / single GM</label>
-            <label><input type="radio" name="q14" value="1" data-pillar="Control">Warm spare</label>
-            <label><input type="radio" name="q14" value="2" data-pillar="Control">Resilient + logs clean</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Discovery &amp; Registry</strong><div class="hint">Device discovery (e.g., NMOS IS-04/05) validated; registry HA</div></div>
-          <div class="opts" role="radiogroup" aria-label="Discovery">
-            <label><input type="radio" name="q15" value="0" data-pillar="Control">Ad-hoc/manual</label>
-            <label><input type="radio" name="q15" value="1" data-pillar="Control">Partial registry</label>
-            <label><input type="radio" name="q15" value="2" data-pillar="Control">Central registry HA</label>
-          </div>
-        </div>
-      </fieldset>
-    </div>
-
-    <!-- Pillar 5 -->
-    <div class="card">
-      <fieldset class="audit-grid">
-        <legend>Pillar 5: Management &amp; Lifecycle</legend>
-
-        <div class="qrow">
-          <div><strong>Asset Inventory &amp; CMDB</strong><div class="hint">Models, serials, firmware, location, ownership tracked</div></div>
-          <div class="opts" role="radiogroup" aria-label="Inventory">
-            <label><input type="radio" name="q16" value="0" data-pillar="Management">Incomplete</label>
-            <label><input type="radio" name="q16" value="1" data-pillar="Management">Partial/periodic</label>
-            <label><input type="radio" name="q16" value="2" data-pillar="Management">Authoritative CMDB</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Patch &amp; Firmware Cadence</strong><div class="hint">Risk-based, maintenance windows, rollbacks, audit logs</div></div>
-          <div class="opts" role="radiogroup" aria-label="Patch">
-            <label><input type="radio" name="q17" value="0" data-pillar="Management">Ad-hoc</label>
-            <label><input type="radio" name="q17" value="1" data-pillar="Management">Quarterly</label>
-            <label><input type="radio" name="q17" value="2" data-pillar="Management">Policy-driven + logs</label>
-          </div>
-        </div>
-
-        <div class="qrow">
-          <div><strong>Config Baselines &amp; Drift</strong><div class="hint">Golden configs, variance reports, enforced baselines</div></div>
-          <div class="opts" role="radiogroup" aria-label="Drift">
-            <label><input type="radio" name="q18" value="0" data-pillar="Management">Unknown</label>
-            <label><input type="radio" name="q18" value="1" data-pillar="Management">Manual spot-checks</label>
-            <label><input type="radio" name="q18" value="2" data-pillar="Management">Automated drift control</label>
-          </div>
-        </div>
-      </fieldset>
-    </div>
-
-    <!-- SCORE -->
-    <div class="card" id="scoreCard" aria-live="polite" aria-atomic="true">
-      <h2>Your Readiness Score</h2>
-      <div class="kpi">
-        <div class="pill"><span class="muted">Total</span><div class="score-lg" id="scoreTotal">0%</div><div class="muted" id="scoreRaw" style="font-size:12px;">0 / 36</div></div>
-        <div class="pill"><span class="muted">Readiness</span><div id="scoreBucket" class="bucket risk">At Risk</div></div>
-        <div class="pill"><span class="muted">TCO Multiplier</span><div class="score-lg" id="tcoMult">1.00×</div></div>
+        </fieldset>
       </div>
 
-      <div class="hr"></div>
+      <!-- Pillar 2 -->
+      <div class="card">
+        <fieldset class="audit-grid">
+          <legend>Pillar 2: Security &amp; Policy</legend>
 
-      <div class="chart-container">
-        <canvas id="scoreChart" role="img" aria-label="Readiness breakdown by pillar"></canvas>
+          <div class="qrow">
+            <div><strong>Segmentation</strong><div class="hint">VRF/VLAN, ACLs, zero-trust policy</div></div>
+            <div class="opts" role="radiogroup" aria-label="Segmentation">
+              <label><input type="radio" name="q5" value="0" data-pillar="Security">Flat</label>
+              <label><input type="radio" name="q5" value="1" data-pillar="Security">Basic</label>
+              <label><input type="radio" name="q5" value="2" data-pillar="Security">Policy-driven</label>
+            </div>
+          </div>
+
+          <div class="qrow">
+            <div><strong>Identity &amp; Access</strong><div class="hint">802.1X/MAB, device inventory, RBAC</div></div>
+            <div class="opts" role="radiogroup" aria-label="Identity">
+              <label><input type="radio" name="q6" value="0" data-pillar="Security">Ad-hoc</label>
+              <label><input type="radio" name="q6" value="1" data-pillar="Security">Partial</label>
+              <label><input type="radio" name="q6" value="2" data-pillar="Security">Managed</label>
+            </div>
+          </div>
+
+          <div class="qrow">
+            <div><strong>Change Control</strong><div class="hint">CAB, windowing, rollback plan, audit trails</div></div>
+            <div class="opts" role="radiogroup" aria-label="Change">
+              <label><input type="radio" name="q12" value="0" data-pillar="Security">Informal</label>
+              <label><input type="radio" name="q12" value="1" data-pillar="Security">Partial</label>
+              <label><input type="radio" name="q12" value="2" data-pillar="Security">Disciplined</label>
+            </div>
+          </div>
+        </fieldset>
       </div>
 
-      <div class="hr"></div>
-      <div id="pillarScores"></div>
-      <div class="hr"></div>
-      <div class="notice">Get your personalized action plan by subscribing below.</div>
-    </div>
+      <!-- Pillar 3 -->
+      <div class="card">
+        <fieldset class="audit-grid">
+          <legend>Pillar 3: Operations &amp; Observability</legend>
 
-    <!-- SUBSCRIBE -->
-    <div class="card" id="subscribe">
-      <h2>Unlock Your Action Plan</h2>
-      <div class="ml-embedded" data-form="2yvzIn"></div>
-      <noscript>This form requires JavaScript.</noscript>
-      <p class="foot">Subscriptions are processed by MailerLite.</p>
-    </div>
+          <div class="qrow">
+            <div><strong>Routing &amp; API Orchestration</strong><div class="hint">Northbound APIs, repeatable provisioning</div></div>
+            <div class="opts" role="radiogroup" aria-label="Routing">
+              <label><input type="radio" name="q8" value="0" data-pillar="Operations">Manual</label>
+              <label><input type="radio" name="q8" value="1" data-pillar="Operations">Scripts</label>
+              <label><input type="radio" name="q8" value="2" data-pillar="Operations">Controller</label>
+            </div>
+          </div>
 
-    <footer class="foot">
-      © Flicktronix. Vendor-neutral assessment. No client data is collected beyond form fields handled by MailerLite.
-    </footer>
+          <div class="qrow">
+            <div><strong>Observability & Telemetry</strong><div class="hint">Telemetry for PTP, multicast, QoS, device health</div></div>
+            <div class="opts" role="radiogroup" aria-label="Observability">
+              <label><input type="radio" name="q9" value="0" data-pillar="Operations">None</label>
+              <label><input type="radio" name="q9" value="1" data-pillar="Operations">Partial</label>
+              <label><input type="radio" name="q9" value="2" data-pillar="Operations">Dashboards + alerts</label>
+            </div>
+          </div>
 
-  </div>
-</div>
+          <div class="qrow">
+            <div><strong>Rollback &amp; Backups</strong><div class="hint">Golden configs, versioned restores, drills</div></div>
+            <div class="opts" role="radiogroup" aria-label="Rollback">
+              <label><input type="radio" name="q10" value="0" data-pillar="Operations">Ad-hoc</label>
+              <label><input type="radio" name="q10" value="1" data-pillar="Operations">Backups</label>
+              <label><input type="radio" name="q10" value="2" data-pillar="Operations">Tested DR</label>
+            </div>
+          </div>
 
-<!-- Intro / Controls -->
-<div class="card" style="max-width:1100px;margin:20px auto;">
-  <h2 id="questions-title">Readiness Assessment</h2>
-  <p class="muted">Select the option that best reflects your current state. Your pillar scores update live.</p>
-  <div class="actions">
-    <button type="button" class="link-btn" id="recalcBtn" title="Recalculate score">Recalculate score</button>
-    <button type="button" id="exportBtn" disabled title="Subscribe to unlock your personalized action plan">Get My Personalized Action Plan</button>
-  </div>
-  <div class="foot">Action Plan export is unlocked after you subscribe via the form.</div>
-</div>
+          <div class="qrow">
+            <div><strong>Pre-Launch Validation</strong><div class="hint">Load/latency tests, failure injection</div></div>
+            <div class="opts" role="radiogroup" aria-label="Prelaunch">
+              <label><input type="radio" name="q11" value="0" data-pillar="Operations">None</label>
+              <label><input type="radio" name="q11" value="1" data-pillar="Operations">Basic</label>
+              <label><input type="radio" name="q11" value="2" data-pillar="Operations">Formal</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
 
+      <!-- Pillar 4 -->
+      <div class="card">
+        <fieldset class="audit-grid">
+          <legend>Pillar 4: Control &amp; Clocking</legend>
+
+          <div class="qrow">
+            <div><strong>PTP Profile &amp; Deployment</strong><div class="hint">IEEE 1588 profile (AES67/2110/802.1AS), HW timestamping, VLAN/TTL</div></div>
+            <div class="opts" role="radiogroup" aria-label="PTP profile">
+              <label><input type="radio" name="q13" value="0" data-pillar="Control">Unknown/mixed</label>
+              <label><input type="radio" name="q13" value="1" data-pillar="Control">Partially aligned</label>
+              <label><input type="radio" name="q13" value="2" data-pillar="Control">Correct profile + HW TS</label>
+            </div>
+          </div>
+
+          <div class="qrow">
+            <div><strong>Grandmaster Stability (BMCA)</strong><div class="hint">Priority/clockClass set, GM failover tested, minimal flaps</div></div>
+            <div class="opts" role="radiogroup" aria-label="GM stability">
+              <label><input type="radio" name="q14" value="0" data-pillar="Control">Flaps / single GM</label>
+              <label><input type="radio" name="q14" value="1" data-pillar="Control">Warm spare</label>
+              <label><input type="radio" name="q14" value="2" data-pillar="Control">Resilient + logs clean</label>
+            </div>
+          </div>
+
+          <div class="qrow">
+            <div><strong>Discovery &amp; Registry</strong><div class="hint">Device discovery (e.g., NMOS IS-04/05) validated; registry HA</div></div>
+            <div class="opts" role="radiogroup" aria-label="Discovery">
+              <label><input type="radio" name="q15" value="0" data-pillar="Control">Ad-hoc/manual</label>
+              <label><input type="radio" name="q15" value="1" data-pillar="Control">Partial registry</label>
+              <label><input type="radio" name="q15" value="2" data-pillar="Control">Central registry HA</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- Pillar 5 -->
+      <div class="card">
+        <fieldset class="audit-grid">
+          <legend>Pillar 5: Management &amp; Lifecycle</legend>
+
+          <div class="qrow">
+            <div><strong>Asset Inventory &amp; CMDB</strong><div class="hint">Models, serials, firmware, location, ownership tracked</div></div>
+            <div class="opts" role="radiogroup" aria-label="Inventory">
+              <label><input type="radio" name="q16" value="0" data-pillar="Management">Incomplete</label>
+              <label><input type="radio" name="q16" value="1" data-pillar="Management">Partial/periodic</label>
+              <label><input type="radio" name="q16" value="2" data-pillar="Management">Authoritative CMDB</label>
+            </div>
+          </div>
+
+          <div class="qrow">
+            <div><strong>Patch &amp; Firmware Cadence</strong><div class="hint">Risk-based, maintenance windows, rollbacks, audit logs</div></div>
+            <div class="opts" role="radiogroup" aria-label="Patch">
+              <label><input type="radio" name="q17" value="0" data-pillar="Management">Ad-hoc</label>
+              <label><input type="radio" name="q17" value="1" data-pillar="Management">Quarterly</label>
+              <label><input type="radio" name="q17" value="2" data-pillar="Management">Policy-driven + logs</label>
+            </div>
+          </div>
+
+          <div class="qrow">
+            <div><strong>Config Baselines &amp; Drift</strong><div class="hint">Golden configs, variance reports, enforced baselines</div></div>
+            <div class="opts" role="radiogroup" aria-label="Drift">
+              <label><input type="radio" name="q18" value="0" data-pillar="Management">Unknown</label>
+              <label><input type="radio" name="q18" value="1" data-pillar="Management">Manual spot-checks</label>
+              <label><input type="radio" name="q18" value="2" data-pillar="Management">Automated drift control</label>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- SCORE -->
+      <div class="card" id="scoreCard">
+        <h2>Your Readiness Score</h2>
+        <div class="kpi">
+          <div class="pill"><span class="muted">Total</span><div class="score-lg" id="scoreTotal">0%</div><div class="muted" id="scoreRaw" style="font-size:12px;">0 / 36</div></div>
+          <div class="pill"><span class="muted">Readiness</span><div id="scoreBucket" class="bucket risk">At Risk</div></div>
+          <div class="pill"><span class="muted">TCO Multiplier</span><div class="score-lg" id="tcoMult">1.00×</div></div>
+        </div>
+
+        <div class="hr"></div>
+        <div class="chart-container">
+          <canvas id="scoreChart" role="img" aria-label="Readiness breakdown by pillar"></canvas>
+        </div>
+
+        <div class="hr"></div>
+        <div id="pillarScores"></div>
+
+        <div class="hr"></div>
+        <div class="actions">
+          <button type="button" class="link-btn" id="recalcBtn" title="Recalculate score">Recalculate score</button>
+          <button type="button" id="exportBtn" disabled title="Subscribe to unlock your personalized action plan">Get My Personalized Action Plan</button>
+        </div>
+        <p class="foot">Action Plan export is unlocked after you subscribe via the form.</p>
+      </div>
+
+      <footer class="foot">
+        © Flicktronix. Vendor-neutral assessment. We don’t collect your answers. MailerLite processes subscription fields only. <strong>Your information is never shared.</strong>
+      </footer>
+    </div><!-- /stack -->
+  </div><!-- /app -->
+</div><!-- /wrap -->
+
+<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-<!-- Unified unlock + guarded click -->
 <script>
-// Single unlock used by ML + load
-function unlockExport(){
+/* ===== Gate control ===== */
+function revealApp(){
+  const app = document.getElementById('app');
+  const gate = document.getElementById('gate');
+  if (gate) gate.style.display = 'none';
+  if (app)  app.style.display  = 'block';
   const btn = document.getElementById('exportBtn');
-  if (!btn) return;
-  btn.disabled = false;
-  btn.title = 'Download your personalized action plan (.pdf)';
-  try { localStorage.setItem('ml_ok','1'); } catch(e){}
+  if (btn){
+    btn.disabled = false;
+    btn.title = 'Download your personalized action plan (.pdf)';
+  }
+  // First paint of scores after reveal
+  updateScoreUI();
 }
 
-// MailerLite callback (must be global with this exact name)
+// MailerLite success hook
 function ml_webform_success_31574996(){
   try { localStorage.setItem('ml_ok','1'); } catch(e){}
-  unlockExport();
+  revealApp();
   return false;
 }
 
-// Init: honor gate; add dev override ?unlock=1; bind guarded click
+// On load: honor gate + dev override (?unlock=1)
 document.addEventListener('DOMContentLoaded', ()=>{
-  const btn = document.getElementById('exportBtn');
-  if (!btn) return;
-
   const dev = new URL(location.href).searchParams.get('unlock') === '1';
   const ok = dev || localStorage.getItem('ml_ok') === '1';
-  if (ok) unlockExport();
+  if (ok) revealApp();
   else {
-    btn.disabled = true;
-    btn.title = 'Subscribe to unlock your personalized action plan';
-  }
-
-  btn.addEventListener('click', ()=>{
-    if (btn.disabled) return;
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-      alert('PDF engine did not load. Refresh the page.'); return;
+    const btn = document.getElementById('exportBtn');
+    if (btn){
+      btn.disabled = true;
+      btn.title = 'Subscribe to unlock your personalized action plan';
     }
-    exportWorksheet();
-  });
+  }
 });
 </script>
 
 <script>
-/* ---------- Scoring (5 pillars, max 36) ---------- */
+/* ===== Scoring (5 pillars, max 36) ===== */
 const PILLARS = {
   "Design":     { label: "Design & Interop (Media/Data)", max: 10 },
   "Security":   { label: "Security & Policy",             max: 6  },
@@ -494,31 +437,9 @@ function bucketFromScore(pct){
   return "At Risk";
 }
 
-function updateScoreUI(){
-  const { total, byPillar, max, pct, tcoMultiplier } = computeScore();
-  const bucket = bucketFromScore(pct);
-
-  document.getElementById("scoreTotal").textContent = `${pct}%`;
-  document.getElementById("scoreRaw").textContent = `${total} / ${max}`;
-
-  const b = document.getElementById("scoreBucket");
-  b.textContent = bucket;
-  b.classList.remove("good","warn","risk");
-  if (bucket === "Robust") b.classList.add("good");
-  else if (bucket === "Emerging") b.classList.add("warn");
-  else b.classList.add("risk");
-
-  document.getElementById("tcoMult").textContent = `${tcoMultiplier.toFixed(2)}×`;
-
-  renderChart(byPillar);
-  renderPillarScores(byPillar);
-
-  return { score: total, bucket, pct, byPillar, tcoMultiplier };
-}
-
 function renderPillarScores(byPillar) {
   const container = document.getElementById("pillarScores");
-  if (!container) return; // not present yet or not on this page
+  if (!container) return; // guard if app is hidden
   let html = '<h3 style="margin:8px 0 6px">Pillar Breakdown</h3>';
   PILLAR_KEYS.forEach(key => {
     const score = byPillar[key] || 0;
@@ -532,10 +453,12 @@ function renderPillarScores(byPillar) {
   container.innerHTML = html;
 }
 
-/* ---------- Chart ---------- */
+/* Chart */
 let chart;
 function renderChart(byPillar){
-  const ctx = document.getElementById('scoreChart').getContext('2d');
+  const canvas = document.getElementById('scoreChart');
+  if (!canvas) return; // guard
+  const ctx = canvas.getContext('2d');
   const data = PILLAR_KEYS.map(k => byPillar[k] || 0);
   const labels = PILLAR_KEYS.map(k => PILLARS[k].label);
   const maxValues = PILLAR_KEYS.map(k => PILLARS[k].max);
@@ -582,7 +505,36 @@ function renderChart(byPillar){
   });
 }
 
-/* ---------- Advice + PDF ---------- */
+function updateScoreUI(){
+  const totalEls = {
+    pct: document.getElementById("scoreTotal"),
+    raw: document.getElementById("scoreRaw"),
+    bucket: document.getElementById("scoreBucket"),
+    tco: document.getElementById("tcoMult")
+  };
+  const { total, byPillar, max, pct, tcoMultiplier } = computeScore();
+  const bucket = bucketFromScore(pct);
+
+  if (totalEls.pct) totalEls.pct.textContent = `${pct}%`;
+  if (totalEls.raw) totalEls.raw.textContent = `${total} / ${max}`;
+  if (totalEls.bucket){
+    totalEls.bucket.textContent = bucket;
+    totalEls.bucket.classList.remove("good","warn","risk");
+    if (bucket === "Robust") totalEls.bucket.classList.add("good");
+    else if (bucket === "Emerging") totalEls.bucket.classList.add("warn");
+    else totalEls.bucket.classList.add("risk");
+  }
+  if (totalEls.tco) totalEls.tco.textContent = `${tcoMultiplier.toFixed(2)}×`;
+
+  renderChart(byPillar);
+  renderPillarScores(byPillar);
+
+  return { score: total, bucket, pct, byPillar, tcoMultiplier };
+}
+</script>
+
+<script>
+/* ===== Advice + PDF ===== */
 function getPriorityAdvice(byPillar) {
   let lowestPillar = '';
   let lowestPercent = 101;
@@ -643,10 +595,7 @@ function exportWorksheet(){
     alert('PDF engine did not load. Refresh the page.'); return;
   }
   const { jsPDF } = window.jspdf;
-
-  // Compute without touching the UI
-  const { total, byPillar, max, pct, tcoMultiplier } = computeScore();
-  const bucket = bucketFromScore(pct);
+  const { bucket, pct, byPillar, tcoMultiplier } = updateScoreUI();
 
   const doc = new jsPDF({ unit:"pt", format:"a4" });
   let y = 60;
@@ -681,42 +630,52 @@ function exportWorksheet(){
   lines.forEach(l=>{const t=doc.splitTextToSize(l,500);doc.text(t,40,y+=14);y+=t.length*12;});
   doc.save("Flicktronix_AV_Action_Plan.pdf");
 }
-
 </script>
 
 <script>
-/* Wire-up (no exportBtn click here—handled in unified block) */
+/* ===== Wire-up ===== */
 document.addEventListener("change", (e)=>{
-  if (e.target.matches('input[type="radio"][data-pillar]')) updateScoreUI();
-});
-document.getElementById("recalcBtn").addEventListener("click", ()=>{
-  const answers={};
-  document.querySelectorAll('input[type="radio"][data-pillar]:checked').forEach(i=>answers[i.name]=i.value);
-  try { localStorage.setItem('answers',JSON.stringify(answers)); } catch(e){}
-  const kpi = document.querySelector('.kpi');
-  updateScoreUI();
-  if (kpi){
-    kpi.style.boxShadow='0 0 0 3px rgba(11,95,255,.25)';
-    setTimeout(()=>{kpi.style.boxShadow='';},300);
-    kpi.scrollIntoView({behavior:'smooth',block:'center'});
+  if (e.target.matches('input[type="radio"][data-pillar]')) {
+    // Persist answers and refresh score
+    const answers={};
+    document.querySelectorAll('input[type="radio"][data-pillar]:checked').forEach(i=>answers[i.name]=i.value);
+    try { localStorage.setItem("answers",JSON.stringify(answers)); } catch(e){}
+    updateScoreUI();
   }
 });
 
-/* Persist answers across reload */
-document.addEventListener("change", e=>{
-  if(e.target.matches('input[type="radio"][data-pillar]')){
-    const answers={};
-    document.querySelectorAll('input[type="radio"][data-pillar]:checked').forEach(i=>answers[i.name]=i.value);
-    localStorage.setItem("answers",JSON.stringify(answers));
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Restore answers, if any
+  try {
+    const saved=JSON.parse(localStorage.getItem("answers")||"{}");
+    Object.entries(saved).forEach(([k,v])=>{
+      const el=document.querySelector(`input[name="${k}"][value="${v}"]`);
+      if(el) el.checked=true;
+    });
+  } catch(e){}
+  // Buttons
+  const recalcBtn = document.getElementById("recalcBtn");
+  if (recalcBtn){
+    recalcBtn.addEventListener("click", ()=>{
+      const answers={};
+      document.querySelectorAll('input[type="radio"][data-pillar]:checked').forEach(i=>answers[i.name]=i.value);
+      try { localStorage.setItem('answers',JSON.stringify(answers)); } catch(e){}
+      const kpi = document.querySelector('.kpi');
+      updateScoreUI();
+      if (kpi){
+        kpi.style.boxShadow='0 0 0 3px rgba(224,85,52,.35)';
+        setTimeout(()=>{kpi.style.boxShadow='';},300);
+        kpi.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
   }
-});
-window.addEventListener("DOMContentLoaded",()=>{
-  const saved=JSON.parse(localStorage.getItem("answers")||"{}");
-  Object.entries(saved).forEach(([k,v])=>{
-    const el=document.querySelector(`input[name="${k}"][value="${v}"]`);
-    if(el) el.checked=true;
-  });
-  updateScoreUI();
+  const exportBtn = document.getElementById("exportBtn");
+  if (exportBtn){
+    exportBtn.addEventListener("click", ()=>{
+      if (exportBtn.disabled) return;
+      exportWorksheet();
+    });
+  }
 });
 </script>
 </body>
