@@ -518,6 +518,7 @@ function updateScoreUI(){
 
 function renderPillarScores(byPillar) {
   const container = document.getElementById("pillarScores");
+  if (!container) return; // not present yet or not on this page
   let html = '<h3 style="margin:8px 0 6px">Pillar Breakdown</h3>';
   PILLAR_KEYS.forEach(key => {
     const score = byPillar[key] || 0;
@@ -642,7 +643,11 @@ function exportWorksheet(){
     alert('PDF engine did not load. Refresh the page.'); return;
   }
   const { jsPDF } = window.jspdf;
-  const { bucket, pct, byPillar, tcoMultiplier } = updateScoreUI();
+
+  // Compute without touching the UI
+  const { total, byPillar, max, pct, tcoMultiplier } = computeScore();
+  const bucket = bucketFromScore(pct);
+
   const doc = new jsPDF({ unit:"pt", format:"a4" });
   let y = 60;
   doc.setFont("helvetica","bold").setFontSize(14).text("Flicktronix AV Readiness — Executive Action Plan",40,y);
@@ -676,6 +681,7 @@ function exportWorksheet(){
   lines.forEach(l=>{const t=doc.splitTextToSize(l,500);doc.text(t,40,y+=14);y+=t.length*12;});
   doc.save("Flicktronix_AV_Action_Plan.pdf");
 }
+
 </script>
 
 <script>
